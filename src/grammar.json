@@ -9282,7 +9282,7 @@
     },
     "kSealed": {
       "type": "PATTERN",
-      "value": "seled",
+      "value": "sealed",
       "flags": "i"
     },
     "kDynamic": {
@@ -9402,7 +9402,7 @@
     },
     "kSafecall": {
       "type": "PATTERN",
-      "value": "safecal",
+      "value": "safecall",
       "flags": "i"
     },
     "kAssembler": {
