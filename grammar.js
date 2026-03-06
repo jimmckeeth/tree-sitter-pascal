@@ -1192,7 +1192,7 @@ module.exports = grammar({
 		kIfndef:           $ => /ifndef/i,
 		kEndif:            $ => /endif/i,
 
-		identifier:        $ => /[&]?[a-zA-Z_]+[0-9_a-zA-Z]*/,
+		identifier:        $ => /[&]?[a-zA-Z_]+[0-9_a-zA-Z$]*/,
 
 	  	_space:            $ => /[\s\r\n\t]+/,
 		pp:                $ => /\{\$[^}]*\}/,
