@@ -814,8 +814,7 @@ module.exports = grammar({
 			$.kProperty,
 			field('name', $.identifier),
 			field('args', optional($.declPropArgs)),
-			':',
-			field('type', $.type),
+			optional(seq(':', field('type', $.type))),
 			repeat(choice(
 				seq($.kIndex, field('index', $._expr)),
 				...enable_if(delphi, seq($.kDispId, field('dispid', $._expr))),
