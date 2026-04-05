@@ -206,7 +206,7 @@ function statements(trailing) {
 			repeat($.caseCase),
 			optional(tr($,'caseCase')),
 			optional(seq(
-				$.kElse,
+				choice($.kElse, $.kOtherwise),
 				optional(':'),
 				optional(tr($,'_statements'))
 			)),
@@ -246,6 +246,7 @@ function statements(trailing) {
 			...semicolon,
 			seq($.assignment, ...semicolon),
 			seq($.varDef, ...semicolon),
+			$.inlineConst,
 			alias($[rn('statement')], $.statement),
 			alias($[rn('if')],        $.if),
 			alias($[rn('ifElse')],    $.ifElse),
@@ -273,33 +274,28 @@ module.exports = grammar({
 	word: $ => $.identifier,
 
 	conflicts: $ => [
-		// The following conflict rules are only needed because "public" can be
-		// a visibility or an attribute. *sigh*
-		// TODO: We would probably avoid this by having separate decl* clauses
-		// for use inside classes and at unit scope, since the "public"
-		// attribute seems to only be valid for standalone routines.
 		...enable_if(public_name,
 			[$._declProc ], [ $._declOperator], [$.declConst], [$.declVar],
 			[$.declType], [$.declProp]
 		),
-		// RTTI attributes clash with fpc declaration hints syntax since both
-		// are surrounded by brackets.
 		...enable_if(rtti,
 			[ $.declProcFwd ], [ $.declVars], [ $.declConsts ], [ $.declTypes]
 		),
-		// `procedure (` could be a declaration of an anonymous procedure or
-		// the call of a function named "procedure" (which doesn't actually
-		// make sense, but for Treesitter it does), so we need another conflict
-		// here.
-		//...enable_if(lambda, [ $.lambda ]),
+		[$.exprTpl, $.exprBinary],
+		[$._ref, $.inlineConst],
+		...enable_if(delphi || fpc,
+			[$._statement, $._statementTr]
+		),
+		[$.exprBinary, $._initializer],
+		[$.literalString],
 	],
 
 	rules: {
-		root:               $ => optional(choice(
+		root:               $ => repeat(choice(
 			$.program,
 			$.library,
 			$.unit,
-			$._definitions // For include files
+			$._definition
 		)),
 
 		// HIGH LEVEL ----------------------------------------------------------
@@ -357,6 +353,13 @@ module.exports = grammar({
 				field('type', $.typeref)
 			))),
 		varDef:          $ => seq($.kVar, $.identifier, ':', field('type', $.typeref)),
+		inlineConst:     $ => seq(
+			$.kConst,
+			field('name', $.identifier),
+			optional(seq(':', field('type', $.type))),
+			field('defaultValue', $.defaultValue),
+			';'
+		),
 		label:           $ => seq($.identifier, ':'),
 		caseLabel:       $ => seq(delimited1(choice($._expr, $.range)), ':'),
 
@@ -370,7 +373,6 @@ module.exports = grammar({
 		statementsTr:    $ => $._statementsTr,
 
 		asmBody: $ => repeat1(choice(
-			///([a-zA-Z0-9_]+([eE][nN][dD])|[eE][nN][dD][a-zA-Z0-9_]+|([^eE]|[eE][^nN]|[eE][nN][^dD]))+/,
 			$.identifier,       // Identifiers
 			/[0-9a-fA-F]/,      // Numbers
 			/[.,:;+\-*\[\]<>&%$]/, // Punctuation
@@ -385,17 +387,6 @@ module.exports = grammar({
 
 		_ref:            $ => choice(
 			...enable_if(templates && fpc,
-				// TODO: Ideally, the kSpecialize should be part of exprTpl,
-				// but for some reason this leads to a rule conflict, so for
-				// now we just put it here.
-				//
-				// Also, we have to write the rule in this weird weird way,
-				// because if we just do
-				//
-				//   seq(optional($.kSpecialize), $.identifier)
-				//
-				// then we can't have a standalone identifier named
-				// "specialize". (Bug in tree-sitter?)
 				prec.left(choice(
 					seq($.kSpecialize, $.identifier),
 					seq(alias($.kSpecialize, $.identifier)),
@@ -428,53 +419,10 @@ module.exports = grammar({
 
 		exprAs:          $ => op.infix(3, $._expr, $.kAs,  $._expr),
 
-		// Unfortunately, we can't use $.exprArgs for $.exprTpl because the
-		// parser cannot handle it.
-		//
-		// There are two conflicting rules:
-		//
-		//   0. Binary comparison: a < b
-		//   1. Template use:      a < b >
-		//                         ^^^^^
-		//                         prefix
-		//
-		// In order for this to work, the prefix must produce the same nodes in
-		// both cases. This is not the case when we introduce a wrapper node.
-		//
-		// Example:
-		//
-		//   exprBinary
-		//     identifier
-		//     <
-		//     identifier
-		//
-		//   vs.
-		//
-		//   exprTpl
-		//     exprArgs <-- extra node
-		//       identifier
-		//       <
-		//       identifier
-		//       >
-		//
-		// Basically the way this works is that there is a tentative node like
-		// "exprTplOrBinary", which looks like this:
-		//
-		//   exprTplOrBinary
-		//     identifier
-		//     <
-		//     identifier
-		//
-		// At this point we don't yet know what we are dealing with.  The next
-		// token will determine whether we are dealing with a comparison or a
-		// template. Then the existing node is simply "renamed". Because of
-		// this, we can't have an extra node in only one of the branches.
-		//
 		exprTpl:         $ => op.args(5, $._ref, $.kLt, delimited1($._expr, ',', 5),  $.kGt),
 		exprSubscript:   $ => op.args(5, $._ref, '[',   $.exprArgs,  ']'  ),
 		exprCall:        $ => op.args(5, $._ref, '(',   optional($.exprArgs), ')'  ),
 
-		// Pascal legacy string formatting for WriteLn(foo:4:3) etc.
 		legacyFormat:    $ => repeat1(seq(':', $._expr)),
 
 		exprArgs:        $ => delimited1(seq($._expr, optional($.legacyFormat))),
@@ -513,7 +461,6 @@ module.exports = grammar({
 
 		exprParens:      $ => prec.left(5,seq('(', $._expr, ')')),
 
-		// Set or array literal
 		exprBrackets:       $ => seq(
 			'[', delimited(choice($._expr, $.range)), ']'
 		),
@@ -549,16 +496,6 @@ module.exports = grammar({
 		typerefArgs:     $ => delimited1($._typeref),
 
 		// GENERIC TYPE DECLARATION --------------------------------------------
-		//
-		// E.g. Foo<A: B, C: D<E>>.XYZ<T>
-		//           ^     ^
-		//     Note the optional constraints, which makes this different from a
-		//     specialization
-		//
-		// We treat regular names as a special case of generic names. I.e. if
-		// you see $._genericName somewhere, it doesn't mean that the name HAS
-		// to be generic, it could just be a regular name like "TFoobar" or
-		// "MyUnit.Foo".
 
 		genericDot:      $ => op.infix(1,$._genericName, $.kDot, $._genericName),
 		genericTpl:      $ => op.args(2,$._genericName, $.kLt, $.genericArgs, $.kGt),
@@ -577,18 +514,28 @@ module.exports = grammar({
 
 		_literal:        $ => choice(
 			$.literalString,
+			$.literalStringMultiline,
 			$.literalNumber,
 			$.kNil, $.kTrue, $.kFalse
 		),
 		literalString:   $ => repeat1($._literalString),
 		_literalString:  $ => choice(/'[^']*'/, $.literalChar),
+		literalStringMultiline: $ => prec(10, seq(
+			"'''",
+			alias(repeat(choice(/[^']/, /'[^']/, /''[^']/)), $.stringContent),
+			"'''"
+		)),
 		literalChar:     $ => seq('#', $._literalInt),
 		literalNumber:   $ => choice($._literalInt, $._literalFloat),
 		_literalInt:     $ => choice(
-			token.immediate(/[-+]?[0-9]+/),
-			token.immediate(/\$[a-fA-F0-9]+/)
+			token.immediate(/[-+]?[0-9][0-9_]*/),
+			token.immediate(/\$[a-fA-F0-9][a-fA-F0-9_]*/),
+			token.immediate(/%[01][01_]*/)
 		),
-		_literalFloat:   $ => prec(10, /[-+]?[0-9]*\.?[0-9]+(e[+-]?[0-9]+)?/),
+		_literalFloat:   $ => prec(10, choice(
+			/[-+]?([0-9][0-9_]*)?\.?[0-9][0-9_]*e[+-]?[0-9][0-9_]*/i,
+			/[-+]?([0-9][0-9_]*)?\.[0-9][0-9_]*/i
+		)),
 
 		range:           $ => seq(
 			$._expr, '..', $._expr
@@ -601,13 +548,11 @@ module.exports = grammar({
 			$.declTypes, $.declVars, $.declConsts, $.defProc,
 			alias($.declProcFwd, $.declProc),
 			$.declLabels, $.declUses, $.declExports,
-
-			// Not actually valid syntax, but helps the parser recover:
-			prec(-1,$.blockTr)
+			prec(-1,tr($,'block'))
 		),
 
 		defProc:         $ => seq(
-			/*pp($,*/ field('header', $.declProc)/*)*/,
+			field('header', $.declProc),
 			pp(
 			 	$,
 				field('local', optional($._definitions)),
@@ -639,8 +584,6 @@ module.exports = grammar({
 
 		defaultValue:    $ => seq($.kEq, $._initializer),
 
-		// Declaration sections
-
 		declUses:        $ => seq($.kUses, delimited($.moduleName), ';'),
 		declExports:     $ => seq($.kExports, delimited($.declExport), ';'),
 
@@ -660,8 +603,6 @@ module.exports = grammar({
 			choice($.kConst, $.kResourcestring),
 			repeat($.declConst),
 		),
-
-		// Declarations
 
 		declType:        $ => seq(
 			...enable_if(rtti, optional($.rttiAttributes)),
@@ -711,8 +652,6 @@ module.exports = grammar({
 		declLabel:       $ => field('name', $.identifier),
 
 		declExport:      $ => seq($._genericName, repeat(seq(choice($.kName, $.kIndex), $._expr))),
-
-		// Type declarations
 
 		declEnum:        $ => seq('(', delimited1($.declEnumValue), ')'),
 		declEnumValue:   $ => seq(field('name', $.identifier), field('value', optional($.defaultValue))),
@@ -778,8 +717,6 @@ module.exports = grammar({
 			$._declClass
 		),
 
-		// Stuff for class/record/interface declarations
-
 		guid:            $ => prec(1,seq('[', $._ref, ']')),
 
 		_declClass:      $ => seq(
@@ -831,8 +768,6 @@ module.exports = grammar({
 
 		declPropArgs:    $ => seq('[', delimited($.declArg, ';'), ']'),
 
-		// Variant records
-
 		declVariant:     $ => prec.right(seq(
 			$.kCase,
 			field('name', optional(seq($.identifier, ':'))),
@@ -858,8 +793,6 @@ module.exports = grammar({
 			field('type', $.type),
 			field('defaultValue', optional($.defaultValue))
 		),
-
-		// Stuff for procedure / function / operator declarations
 
 		_declProc:       $ => seq(
 			...enable_if(fpc, optional($.kGeneric)),
@@ -925,22 +858,18 @@ module.exports = grammar({
 			)
 		),
 
-		// Attributes & declaration hints
-
-		_procAttribute:  $ => /*pp($,*/choice(
+		_procAttribute:  $ => choice(
 			seq(field('attribute', $.procAttribute), ';'),
-			// FPC-specific syntax, e.g. procedure myproc; [public; alias:'bla'; cdecl];
 			...enable_if(fpc, seq(
 				'[',
 				delimited(field('attribute', choice($.procAttribute, $.procExternal))),
 				']', ';'
 			))
-		)/*)*/,
-		_procAttributeNoExt: $ => /*pp($,*/ choice(
+		),
+		_procAttributeNoExt: $ => choice(
 			seq(field('attribute', $.procAttribute), ';'),
-			// FPC-specific syntax, e.g. procedure myproc; [public; alias:'bla'; cdecl];
 			...enable_if(fpc, seq('[', delimited(field('attribute', choice($.procAttribute)), ';'), ']', ';'))
-		)/*)*/,
+		),
 
 		procAttribute:   $ => choice(
 			$.kStatic, $.kVirtual, $.kDynamic, $.kAbstract, $.kOverride,
@@ -979,7 +908,6 @@ module.exports = grammar({
 		),
 
 		rttiAttributes:  $ => repeat1(seq(
-			// Note: "Identifier:" is for tagging parameters of procedures (Delphi)
 			'[', optional(seq($.identifier, ':')), delimited($._ref), ']'
 		)),
 
@@ -997,7 +925,6 @@ module.exports = grammar({
 			choice($._expr, $.recInitializer, $.arrInitializer)
 		)),
 
-		// record initializer
 		recInitializer:  $ => seq(
 			'(',
 			delimited1( $.recInitializerField, ';'),
@@ -1009,7 +936,6 @@ module.exports = grammar({
 			field('value', $._initializer)
 		),
 
-		// array initializer
 		arrInitializer:  $ => prec(1,seq('(', delimited1($._initializer), ')')),
 
 		// TERMINAL SYMBOLS ----------------------------------------------------
@@ -1083,10 +1009,10 @@ module.exports = grammar({
 		kAt:               $ => '@',
 		kHat:              $ => '^',
 		kAssign:           $ => ':=',
-		kAssignAdd:        $ => '+=', // Freepascal
-		kAssignSub:        $ => '-=', // Freepascal
-		kAssignMul:        $ => '*=', // Freepascal
-		kAssignDiv:        $ => '/=', // Freepascal
+		kAssignAdd:        $ => '+=',
+		kAssignSub:        $ => '-=',
+		kAssignMul:        $ => '*=',
+		kAssignDiv:        $ => '/=',
 		kOr:               $ => /or/i,
 		kXor:              $ => /xor/i,
 		kDiv:              $ => /div/i,
@@ -1115,6 +1041,7 @@ module.exports = grammar({
 		kRaise:            $ => /raise/i,
 		kOn:               $ => /on/i,
 		kCase:             $ => /case/i,
+		kOtherwise:        $ => /otherwise/i,
 		kWith:             $ => /with/i,
 		kGoto:             $ => /goto/i,
 
@@ -1181,7 +1108,6 @@ module.exports = grammar({
 		kVarargs:          $ => /varargs/i,
 		kWinapi:           $ => /winapi/i,
 		kAlias:            $ => /alias/i,
-		// Delphi
 		kDelayed:          $ => /delayed/i,
 
 		kNil:              $ => /nil/i,

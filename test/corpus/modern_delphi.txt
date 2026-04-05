@@ -1,0 +1,201 @@
+===
+Inline Constants
+===
+procedure Test;
+begin
+  const A = 10;
+  const B: Integer = 20;
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (block
+   (kBegin)
+   (inlineConst
+    (kConst)
+    (identifier)
+    (defaultValue
+     (kEq)
+     (literalNumber)))
+   (inlineConst
+    (kConst)
+    (identifier)
+    (type
+     (typeref
+      (identifier)))
+    (defaultValue
+     (kEq)
+     (literalNumber)))
+   (kEnd))))
+
+===
+Delphi 12 Multi-line String
+===
+procedure Test;
+var
+  S: string;
+begin
+  S := '''
+    This is a
+    multi-line
+    string
+    '''
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (declVars
+   (kVar)
+   (declVar
+    (identifier)
+    (type
+     (declString
+      (kString)))))
+  (block
+   (kBegin)
+   (assignment
+    (identifier)
+    (kAssign)
+    (literalStringMultiline
+     (stringContent)))
+   (kEnd))))
+
+===
+Numeric Underscores
+===
+procedure Test;
+begin
+  var i := 1_000_000;
+  var f := 1.234_567;
+  var h := $FF_AA
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (block
+   (kBegin)
+   (assignment
+    (varAssignDef
+     (kVar)
+     (identifier))
+    (kAssign)
+    (literalNumber))
+   (assignment
+    (varAssignDef
+     (kVar)
+     (identifier))
+    (kAssign)
+    (literalNumber))
+   (assignment
+    (varAssignDef
+     (kVar)
+     (identifier))
+    (kAssign)
+    (literalNumber))
+   (kEnd))))
+
+===
+Binary Literals
+===
+procedure Test;
+begin
+  var b := %101010
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (block
+   (kBegin)
+   (assignment
+    (varAssignDef
+     (kVar)
+     (identifier))
+    (kAssign)
+    (literalNumber))
+   (kEnd))))
+
+===
+Case Otherwise
+===
+procedure Test;
+begin
+  case X of
+    1: DoOne;
+    otherwise DoElse
+  end
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (block
+   (kBegin)
+   (case
+    (kCase)
+    (identifier)
+    (kOf)
+    (caseCase
+     (caseLabel
+      (literalNumber))
+     (statement
+      (identifier)))
+    (kOtherwise)
+    (statement
+     (identifier))
+    (kEnd))
+   (kEnd))))
+
+===
+Nested Generics Conflict
+===
+procedure Test;
+begin
+  Assert(X < Y);
+  List := TList<TList<Integer>>.Create
+end;
+---
+(root
+ (defProc
+  (declProc
+   (kProcedure)
+   (identifier))
+  (block
+   (kBegin)
+   (statement
+    (exprCall
+     (identifier)
+     (exprArgs
+      (exprBinary
+       (identifier)
+       (kLt)
+       (identifier)))))
+   (assignment
+    (identifier)
+    (kAssign)
+    (exprDot
+     (exprTpl
+      (identifier)
+      (kLt)
+      (exprTpl
+       (identifier)
+       (kLt)
+       (identifier)
+       (kGt))
+      (kGt))
+     (kDot)
+     (identifier)))
+   (kEnd))))
