@@ -50,7 +50,7 @@ function exportRules() {
                 ruleTests[rule].add(file);
             }
             if (!fileTestCounts[file]) {
-                fileTestCounts[file] = (content.match(/^===/gm) || []).length;
+                fileTestCounts[file] = Math.floor((content.match(/^===/gm) || []).length / 2);
             }
         });
     });
@@ -58,7 +58,7 @@ function exportRules() {
     // 3. Run tree-sitter test and parse results
     let testOutput = "";
     try {
-        testOutput = execSync('npx tree-sitter test', { encoding: 'utf8' });
+        testOutput = execSync('npx tree-sitter test --overview-only', { encoding: 'utf8' });
     } catch (e) {
         testOutput = e.stdout || e.stderr || "";
     }
@@ -67,12 +67,36 @@ function exportRules() {
     corpusFiles.forEach(f => {
         const base = f.replace('.txt', '');
         fileStats[f] = { pass: 0, fail: 0 };
-        const sectionRegex = new RegExp(`  ${base}:[\\s\\S]*?(?:  \\w+:|$)`, 'g');
-        const sectionMatch = sectionRegex.exec(testOutput);
-        if (sectionMatch) {
-            const section = sectionMatch[0];
-            fileStats[f].pass = (section.match(/✓/g) || []).length;
-            fileStats[f].fail = (section.match(/✗/g) || []).length;
+        
+        const searchStr = `  ${base}:`;
+        const startIndex = testOutput.indexOf(searchStr);
+        
+        if (startIndex !== -1) {
+            // Find the start of the next category or the failure summary
+            const nextCatMatch = testOutput.slice(startIndex + 1).match(/\n  [\w-]+:|\n\d+ failure/);
+            const endIndex = nextCatMatch ? startIndex + 1 + nextCatMatch.index : testOutput.length;
+            const section = testOutput.slice(startIndex, endIndex);
+            
+            // Match any line starting with whitespace, then digits, then a dot, then ANY non-whitespace char (the pass/fail symbol)
+            const testLines = section.split('\n').filter(line => /^\s+\d+\.\s+\S/.test(line));
+            testLines.forEach(line => {
+                // Determine pass/fail robustly by checking for both standard UTF-8 and CP437 mojibake
+                if (line.includes('✓') || line.includes('Γ£ô')) {
+                    fileStats[f].pass++;
+                } else if (line.includes('✗') || line.includes('Γ£ù')) {
+                    fileStats[f].fail++;
+                } else {
+                    // Fallback to regex if we get completely unknown symbols or ANSI stripped colors
+                    if (line.includes('\x1b[31m') || line.match(/\d+\.\s+[^✓Γ£ô\x1b]/)) {
+                        fileStats[f].fail++;
+                    } else {
+                        fileStats[f].pass++;
+                    }
+                }
+            });
+            console.log(`DEBUG Found results for ${base}: pass=${fileStats[f].pass}, fail=${fileStats[f].fail}`);
+        } else {
+            console.warn(`Warning: Could not find results for ${base} in test output.`);
         }
     });
 
@@ -87,6 +111,15 @@ function exportRules() {
     // 5. Calculate Summary & Totals
     const catStats = {};
     const totals = { rules: 0, tested: 0, untested: 0, totalTests: 0, pass: 0, fail: 0 };
+    
+    // Calculate global passing/failing tests first to avoid double counting from rules
+    Object.keys(fileStats).forEach(file => {
+        const s = fileStats[file];
+        totals.pass += s.pass;
+        totals.fail += s.fail;
+        totals.totalTests += fileTestCounts[file];
+    });
+    console.log('DEBUG Totals after fileStats loop:', totals);
 
     Object.keys(categories).sort().forEach(catName => {
         const catRules = categories[catName];
@@ -119,9 +152,6 @@ function exportRules() {
         totals.rules += catStats[catName].rules;
         totals.tested += catStats[catName].tested;
         totals.untested += catStats[catName].untested;
-        totals.totalTests += catStats[catName].totalTests;
-        totals.pass += catStats[catName].pass;
-        totals.fail += catStats[catName].fail;
     });
 
     // 6. Generate Markdown for rules.md
@@ -139,6 +169,16 @@ function exportRules() {
     summaryTable += `| **TOTAL** | **${totals.rules}** | **${totals.tested}** | **${totals.untested}** | **${totals.totalTests}** | **${totals.pass}** | **${totals.fail}** |\n`;
     
     output += summaryTable;
+    output += '\n---\n\n';
+
+    let fileTable = '## <a id="file-status"></a>Test File Status\n\n';
+    fileTable += '| File | Tests | Passing | Failing |\n';
+    fileTable += '| :--- | :---: | :---: | :---: |\n';
+    Object.keys(fileStats).sort().forEach(file => {
+        const s = fileStats[file];
+        fileTable += `| \`${file}\` | ${fileTestCounts[file]} | ${s.pass} | ${s.fail} |\n`;
+    });
+    output += fileTable;
     output += '\n---\n\n';
 
     Object.keys(categories).sort().forEach(cat => {

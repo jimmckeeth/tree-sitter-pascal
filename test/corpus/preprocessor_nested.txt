@@ -10,15 +10,23 @@ begin
 end;
 {$endif}
 ---
+
 (root
   (defProc
-    (header (declProc (kProcedure) (identifier)))
+    (declProc
+      (kProcedure)
+      (identifier))
     (pp)
-    (local
-      (pp)
-      (declVars (kVar) (declVar (identifier) (type (typeref (identifier)))))
-      (pp))
-    (body
-      (block (kBegin) (kEnd)))
     (pp)
-    (semicolon)))
+    (declVars
+      (kVar)
+      (declVar
+        (identifier)
+        (type
+          (typeref
+            (identifier)))))
+    (pp)
+    (block
+      (kBegin)
+      (kEnd))
+    (pp)))
