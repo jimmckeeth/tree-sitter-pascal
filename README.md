@@ -26,7 +26,7 @@ Grammar for Delphi's Object Pascal and divergent dialects like Freepascal. Focus
 
 | Category                                                             |  Rules  | Tested  | Untested | Total Tests | Passing | Failing |
 | :------------------------------------------------------------------- | :-----: | :-----: | :------: | :---------: | :-----: | :-----: |
-| [Declarations & Definitions](docs/rules.md#declarations-definitions) |   51    |   42    |    9     |     658     |   376   |   281   |
+| [Declarations & Definitions](docs/rules.md#declarations-definitions) |   51    |   42    |    9     |     649     |   367   |   281   |
 | [Expressions](docs/rules.md#expressions)                             |   13    |   11    |    2     |     635     |   353   |   281   |
 | [High-Level Structure](docs/rules.md#high-level-structure)           |    9    |    9    |    0     |     653     |   371   |   281   |
 | [Internal Helpers](docs/rules.md#internal-helpers)                   |   26    |    0    |    26    |      0      |    0    |    0    |
