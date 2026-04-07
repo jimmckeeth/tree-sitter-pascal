@@ -1,14 +1,16 @@
 # Diabolical Testing Process
 
-## Overview
+*Breaking tree-sitter's grammar with a diabolically fuzzy oracle.* In developing something as complicated as a grammar, failing test cases are useful.
 
-Traditional human-written tests are often limited by the developer's or tester's own understanding of the grammar. This leads to "happy path" testing where the tests validate the implementation's assumptions rather than the language's true boundaries.
+## Overview[<img src="diabolically-fuzzy.webp" alt="diabolically-fuzzy" style="zoom:50%; float:right" />](diabolically-fuzzy.avif)
+
+Traditional human-written tests are often limited by the developer's or tester's own understanding of the grammar. This leads to *"happy path"* testing where the tests validate the implementation's assumptions rather than the language's true boundaries. AI/LLM are not much better in this regard. They tend to prefer making tests that pass. 
 
 The **Diabolical Testing Process** decouples test generation from the implementation by using the actual Delphi compiler as the source of truth and a **Structural Oracle** to predict the correct AST.
 
 ## Targeted Features
 
-We are systematically stress-testing the following modern Delphi features:
+For starters, we are systematically stress-testing the following modern Delphi features that I added to the tree-sitter grammar:
 
 1. **Ternary `if` Expressions:** `Result := if A then B else C;` (Delphi 13)
 2. **Extended Logical Operators:** `is not` and `not in` (Delphi 13)
@@ -19,7 +21,7 @@ We are systematically stress-testing the following modern Delphi features:
 7. **Inline Variable Declarations:** `var I := 10;` inside code blocks (Delphi 10.3)
 8. **Inline Constant Declarations:** `const C = 42;` inside code blocks (Delphi 12)
 9. **The `otherwise` Keyword:** Used in `case` statements (Delphi 12)
-10. **Nested Preprocessor Directives:** Recursive `$ifdef` / `$if` blocks.
+10. **Nested Preprocessor Directives:** Recursive `$ifdef` / `$if` blocks. (not new, but a discovered gap)
 
 ## The Workflow
 
@@ -28,7 +30,7 @@ We are systematically stress-testing the following modern Delphi features:
     * If the compiler rejects the code, it is discarded.
     * If the compiler accepts the code, it is a **verified valid edge case**.
     * **De-duplication:** Only unique code strings are kept.
-3. **The Showdown:** We run the verified cases through the Tree-sitter parser.
+3. **The Showdown:** The compliable code and it's AST pair are added as test cases and run through the Tree-sitter parser.
 4. **Incompetence Detection:** A failure occurs if:
     * Tree-sitter produces an `(ERROR)` or `(MISSING)` node.
     * Tree-sitter produces a valid tree that **does not match the Oracle's Expected AST**. This reveals logical flaws in precedence or associativity.
@@ -43,5 +45,8 @@ We are systematically stress-testing the following modern Delphi features:
 
 ## Fuzzer Scripts
 
-* `test/fuzz_delphi.js`: General fuzzer for multiple features.
-* `test/full-ternary.js`: Deep-dive oracle fuzzer for ternary expression complexity and precedence.
+* [`test/fuzz-delphi.js`](../test/fuzz-delphi.js): General fuzzer for multiple features.
+* [`test/fuzz-ternary.js`](../test/fuzz-ternary.js): Deep-dive oracle fuzzer for ternary expression complexity and precedence.
+* [`test/fuzz-multiline.js`](../test/fuzz-multiline.js): Oracle fuzzer for multi-line string literal edge cases.
+* [`test/fuzz-logical.js`](../test/fuzz-logical.js): Oracle fuzzer for logical operators (`is not`, `not in`).
+* [`test/fuzz-inline.js`](../test/fuzz-inline.js): Oracle fuzzer for inline variables and `case` structure.

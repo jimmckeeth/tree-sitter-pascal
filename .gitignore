@@ -4,3 +4,6 @@ build
 *.obj
 *.lib
 *.exp
+fuzz_*_temp.*
+temp_parse.pas
+tmp/

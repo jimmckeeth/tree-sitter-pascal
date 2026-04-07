@@ -2,7 +2,7 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 
 const dcc32 = `"C:\\Program Files (x86)\\Embarcadero\\Studio\\37.0\\bin\\dcc32.EXE"`;
-const tempFile = 'fuzz_temp.pas';
+const tempFile = 'tmp/fuzz_temp.pas';
 const corpusFile = 'test/corpus/modern_delphi_diabolical.txt';
 
 function genExpr(type, depth) {

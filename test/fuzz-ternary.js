@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 
 const dcc32 = `"C:\\Program Files (x86)\\Embarcadero\\Studio\\37.0\\bin\\dcc32.EXE"`;
-const tempFile = 'fuzz_ternary_temp.pas';
+const tempFile = 'tmp/fuzz_ternary_temp.pas';
 const corpusFile = 'test/corpus/diabolical-ternary.txt';
 
 function createDelphiProgram(body) {
@@ -121,14 +121,15 @@ uniqueResults.forEach((expectedAST, code) => {
     try {
         const output = execSync(`npx tree-sitter parse temp_parse.pas`, { encoding: 'utf8' }).trim();
         
-        // Clean up Tree-sitter output (remove line ranges [0,0] etc)
+        // Clean up Tree-sitter output (remove line ranges [0,0] etc, and fields name:)
         const actualAST = output.replace(/\s*\[\d+,\s*\d+\]\s*-\s*\[\d+,\s*\d+\]/g, '')
+                                .replace(/\w+:\s+/g, '') // Strip field labels like "name: "
                                 .replace(/\s+/g, ' ')
-                                .replace(/\(root /g, '(root')
+                                .replace(/\(root\(/g, '(root (') // Standardize root start
                                 .trim();
         
         // Construct the expected full AST for comparison
-        const fullExpected = `(root (defProc header: (declProc (kProcedure) (identifier)) body: (block (kBegin) (assignment (identifier) (kAssign) ${expectedAST}) (kEnd))))`
+        const fullExpected = `(root (defProc (declProc (kProcedure) (identifier)) (block (kBegin) (assignment (identifier) (kAssign) ${expectedAST}) (kEnd))))`
                                 .replace(/\s+/g, ' ')
                                 .trim();
 

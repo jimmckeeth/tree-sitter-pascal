@@ -36,67 +36,94 @@ function exportRules() {
         rules.add(match[1]);
     }
 
-    // 2. Scan corpus files for usage
+    // 2. Scan corpus files for usage and map rules to specific test cases
     const corpusFiles = fs.readdirSync(corpusPath).filter(f => f.endsWith('.txt'));
-    const ruleTests = {};
-    const fileTestCounts = {};
+    const ruleTests = {}; // rule -> Set(unique test identifiers)
+    const allTestInfos = {}; // unique test identifier -> { name, file, pass: bool }
+    
+    rules.forEach(rule => { ruleTests[rule] = new Set(); });
 
-    rules.forEach(rule => {
-        ruleTests[rule] = new Set();
-        const searchPattern = new RegExp(`\\(${rule}\\b`, 'g');
-        corpusFiles.forEach(file => {
-            const content = fs.readFileSync(path.join(corpusPath, file), 'utf8');
-            if (searchPattern.test(content)) {
-                ruleTests[rule].add(file);
+    let totalBlocksFound = 0;
+    corpusFiles.forEach(file => {
+        const content = fs.readFileSync(path.join(corpusPath, file), 'utf8');
+        const lines = content.split(/\r?\n/);
+        
+        let i = 0;
+        while (i < lines.length) {
+            if (lines[i].trim() === '===') {
+                i++;
+                if (i >= lines.length) break;
+                
+                const testName = lines[i].trim();
+                i++;
+                if (i >= lines.length || lines[i].trim() !== '===') continue;
+                i++;
+                
+                let codeAndAST = "";
+                while (i < lines.length && lines[i].trim() !== '===') {
+                    codeAndAST += lines[i] + "\n";
+                    i++;
+                }
+                
+                totalBlocksFound++;
+                const testId = `${file}::${testName}`;
+                allTestInfos[testId] = { name: testName, file: file, pass: true };
+                
+                const parts = codeAndAST.split(/\n---\n/);
+                const astPart = parts[1] || "";
+                
+                rules.forEach(rule => {
+                    const searchPattern = new RegExp(`\\(${rule}\\b`, 'g');
+                    if (searchPattern.test(astPart)) {
+                        ruleTests[rule].add(testId);
+                    }
+                });
+            } else {
+                i++;
             }
-            if (!fileTestCounts[file]) {
-                fileTestCounts[file] = Math.floor((content.match(/^===/gm) || []).length / 2);
-            }
-        });
+        }
     });
+    console.log(`DEBUG: Total unique tests in allTestInfos: ${Object.keys(allTestInfos).length}`);
+    console.log(`DEBUG: Total test blocks matched: ${totalBlocksFound}`);
 
-    // 3. Run tree-sitter test and parse results
+    // 3. Run tree-sitter test and parse results to update pass/fail status
     let testOutput = "";
     try {
-        testOutput = execSync('npx tree-sitter test --overview-only', { encoding: 'utf8' });
+        const cmd = process.platform === 'win32' 
+            ? 'chcp 65001 > nul && npx tree-sitter test --overview-only' 
+            : 'npx tree-sitter test --overview-only';
+        testOutput = execSync(cmd, { encoding: 'utf8' });
     } catch (e) {
         testOutput = e.stdout || e.stderr || "";
     }
 
-    const fileStats = {};
+    // Parse overview output to mark failing tests
+    const fileStats = {}; // Keep for the file table
     corpusFiles.forEach(f => {
         const base = f.replace('.txt', '');
         fileStats[f] = { pass: 0, fail: 0 };
         
         const searchStr = `  ${base}:`;
         const startIndex = testOutput.indexOf(searchStr);
-        
         if (startIndex !== -1) {
-            // Find the start of the next category or the failure summary
             const nextCatMatch = testOutput.slice(startIndex + 1).match(/\n  [\w-]+:|\n\d+ failure/);
             const endIndex = nextCatMatch ? startIndex + 1 + nextCatMatch.index : testOutput.length;
             const section = testOutput.slice(startIndex, endIndex);
             
-            // Match any line starting with whitespace, then digits, then a dot, then ANY non-whitespace char (the pass/fail symbol)
             const testLines = section.split('\n').filter(line => /^\s+\d+\.\s+\S/.test(line));
             testLines.forEach(line => {
-                // Determine pass/fail robustly by checking for both standard UTF-8 and CP437 mojibake
-                if (line.includes('✓') || line.includes('Γ£ô')) {
-                    fileStats[f].pass++;
-                } else if (line.includes('✗') || line.includes('Γ£ù')) {
-                    fileStats[f].fail++;
-                } else {
-                    // Fallback to regex if we get completely unknown symbols or ANSI stripped colors
-                    if (line.includes('\x1b[31m') || line.match(/\d+\.\s+[^✓Γ£ô\x1b]/)) {
-                        fileStats[f].fail++;
-                    } else {
-                        fileStats[f].pass++;
-                    }
+                const nameMatch = line.match(/\d+\.\s+[^✓Γ£ô✗Γ£ù\s]+\s+(.*)$/);
+                const isPass = line.includes('✓') || line.includes('Γ£ô');
+                const testName = nameMatch ? nameMatch[1].trim() : "";
+                const testId = `${f}::${testName}`;
+                
+                if (allTestInfos[testId]) {
+                    allTestInfos[testId].pass = isPass;
                 }
+                
+                if (isPass) fileStats[f].pass++;
+                else fileStats[f].fail++;
             });
-            console.log(`DEBUG Found results for ${base}: pass=${fileStats[f].pass}, fail=${fileStats[f].fail}`);
-        } else {
-            console.warn(`Warning: Could not find results for ${base} in test output.`);
         }
     });
 
@@ -112,39 +139,33 @@ function exportRules() {
     const catStats = {};
     const totals = { rules: 0, tested: 0, untested: 0, totalTests: 0, pass: 0, fail: 0 };
     
-    // Calculate global passing/failing tests first to avoid double counting from rules
-    Object.keys(fileStats).forEach(file => {
-        const s = fileStats[file];
-        totals.pass += s.pass;
-        totals.fail += s.fail;
-        totals.totalTests += fileTestCounts[file];
+    // Global totals from all unique tests
+    Object.values(allTestInfos).forEach(t => {
+        if (t.pass) totals.pass++; else totals.fail++;
+        totals.totalTests++;
     });
-    console.log('DEBUG Totals after fileStats loop:', totals);
 
     Object.keys(categories).sort().forEach(catName => {
         const catRules = categories[catName];
         let testedCount = 0;
-        const seenFiles = new Set();
+        const catUniqueTests = new Set();
 
         catRules.forEach(rule => {
             if (ruleTests[rule].size > 0) testedCount++;
-            ruleTests[rule].forEach(file => seenFiles.add(file));
+            ruleTests[rule].forEach(tid => catUniqueTests.add(tid));
         });
 
-        let catTotalTests = 0;
         let catPass = 0;
         let catFail = 0;
-        seenFiles.forEach(file => {
-            catTotalTests += fileTestCounts[file];
-            catPass += fileStats[file].pass;
-            catFail += fileStats[file].fail;
+        catUniqueTests.forEach(tid => {
+            if (allTestInfos[tid].pass) catPass++; else catFail++;
         });
 
         catStats[catName] = {
             rules: catRules.length,
             tested: testedCount,
             untested: catRules.length - testedCount,
-            totalTests: catTotalTests,
+            totalTests: catUniqueTests.size,
             pass: catPass,
             fail: catFail
         };
@@ -155,10 +176,7 @@ function exportRules() {
     });
 
     // 6. Generate Markdown for rules.md
-    let output = '# Tree-sitter Delphi Rules List\n\n';
-    
-    let summaryTable = '## <a id="summary"></a>Summary\n\n';
-    summaryTable += '| Category | Rules | Tested | Untested | Total Tests | Passing | Failing |\n';
+    let summaryTable = '| Category | Rules | Tested | Untested | Total Tests | Passing | Failing |\n';
     summaryTable += '| :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n';
     
     Object.keys(catStats).sort().forEach(cat => {
@@ -168,6 +186,8 @@ function exportRules() {
     
     summaryTable += `| **TOTAL** | **${totals.rules}** | **${totals.tested}** | **${totals.untested}** | **${totals.totalTests}** | **${totals.pass}** | **${totals.fail}** |\n`;
     
+    let output = '# Tree-sitter Delphi Rules List\n\n';
+    output += '## <a id="summary"></a>Summary\n\n';
     output += summaryTable;
     output += '\n---\n\n';
 
@@ -176,7 +196,8 @@ function exportRules() {
     fileTable += '| :--- | :---: | :---: | :---: |\n';
     Object.keys(fileStats).sort().forEach(file => {
         const s = fileStats[file];
-        fileTable += `| \`${file}\` | ${fileTestCounts[file]} | ${s.pass} | ${s.fail} |\n`;
+        const total = s.pass + s.fail;
+        fileTable += `| \`${file}\` | ${total} | ${s.pass} | ${s.fail} |\n`;
     });
     output += fileTable;
     output += '\n---\n\n';
@@ -188,9 +209,10 @@ function exportRules() {
         
         categories[cat].sort().forEach(rule => {
             const tests = ruleTests[rule].size > 0 
-                ? Array.from(ruleTests[rule]).map(f => `\`${f}\``).join(', ')
-                : '*No explicit test found*';
-            output += `| **${rule}** | ${tests} |\n`;
+                ? Array.from(ruleTests[rule]).map(tid => `\`${allTestInfos[tid].file}\``)
+                : [];
+            const uniqueTestFiles = Array.from(new Set(tests)).join(', ');
+            output += `| **${rule}** | ${uniqueTestFiles || '*No explicit test found*'} |\n`;
         });
         output += '\n[Back to Summary](#summary)\n\n';
     });
@@ -227,7 +249,6 @@ function exportRules() {
 function formatMarkdown(filePath) {
     try {
         console.log(`Formatting ${filePath}...`);
-        // Use npx to ensure we use local versions if available, falling back to global/download
         execSync(`npx prettier --write "${filePath}"`, { stdio: 'inherit' });
         execSync(`npx markdownlint-cli2 --fix --config .markdownlint.jsonc "${filePath}"`, { stdio: 'inherit' });
     } catch (e) {
