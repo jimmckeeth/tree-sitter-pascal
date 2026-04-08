@@ -1,0 +1,131 @@
+===
+Fuzzed Records 1
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 2
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+      class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 3
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 4
+===
+type TMyRecord = record
+  class operator Initialize(out Dest: TMyRecord);
+      class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 5
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 6
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 7
+===
+type TMyRecord = record
+  class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 8
+===
+type TMyRecord = record
+  class operator Initialize(out Dest: TMyRecord);
+      class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 9
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+      class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 10
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 11
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+      class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 12
+===
+type TMyRecord = record
+  class operator Finalize(var Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kVar) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 13
+===
+type TMyRecord = record
+  class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+
+===
+Fuzzed Records 14
+===
+type TMyRecord = record
+  class operator Initialize(out Dest: TMyRecord);
+end;
+---
+(root (declTypes (kType) (declType (identifier) (kEq) (declClass (kRecord) (declProc (kClass) (kOperator) (identifier) (declArgs (declArg (kOut) (identifier) (type (typeref (identifier)))))) (kEnd)))))
+

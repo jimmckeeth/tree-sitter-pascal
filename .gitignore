@@ -4,6 +4,9 @@ build
 *.obj
 *.lib
 *.exp
+*.pyd
+*.egg-info
+uv.lock
 fuzz_*_temp.*
 temp_parse.pas
 tmp/

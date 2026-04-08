@@ -50,3 +50,6 @@ For starters, we are systematically stress-testing the following modern Delphi f
 * [`test/fuzz-multiline.js`](../test/fuzz-multiline.js): Oracle fuzzer for multi-line string literal edge cases.
 * [`test/fuzz-logical.js`](../test/fuzz-logical.js): Oracle fuzzer for logical operators (`is not`, `not in`).
 * [`test/fuzz-inline.js`](../test/fuzz-inline.js): Oracle fuzzer for inline variables and `case` structure.
+* [`test/fuzz-numbers.js`](../test/fuzz-numbers.js): Oracle fuzzer for numeric separators and binary literals.
+* [`test/fuzz-records.js`](../test/fuzz-records.js): Oracle fuzzer for custom managed records (`class operator`).
+* [`test/fuzz-preprocessor.js`](../test/fuzz-preprocessor.js): Fuzzer for nested and split preprocessor directives.

@@ -54,7 +54,7 @@ function exportRules() {
                 i++;
                 if (i >= lines.length) break;
                 
-                const testName = lines[i].trim();
+                const testName = lines[i].trim().replace(/\r$/, "");
                 i++;
                 if (i >= lines.length || lines[i].trim() !== '===') continue;
                 i++;
@@ -69,7 +69,7 @@ function exportRules() {
                 const testId = `${file}::${testName}`;
                 allTestInfos[testId] = { name: testName, file: file, pass: true };
                 
-                const parts = codeAndAST.split(/\n---\n/);
+                const parts = codeAndAST.split(/\r?\n---\r?\n/);
                 const astPart = parts[1] || "";
                 
                 rules.forEach(rule => {
@@ -83,39 +83,59 @@ function exportRules() {
             }
         }
     });
-    console.log(`DEBUG: Total unique tests in allTestInfos: ${Object.keys(allTestInfos).length}`);
-    console.log(`DEBUG: Total test blocks matched: ${totalBlocksFound}`);
 
     // 3. Run tree-sitter test and parse results to update pass/fail status
     let testOutput = "";
     try {
+        // Run full test to ensure we get the failures list if anything fails
         const cmd = process.platform === 'win32' 
-            ? 'chcp 65001 > nul && npx tree-sitter test --overview-only' 
-            : 'npx tree-sitter test --overview-only';
-        testOutput = execSync(cmd, { encoding: 'utf8' });
+            ? 'chcp 65001 > nul && npx tree-sitter test' 
+            : 'npx tree-sitter test';
+        testOutput = execSync(cmd, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
     } catch (e) {
-        testOutput = e.stdout || e.stderr || "";
+        testOutput = e.stdout ? e.stdout.toString() : (e.stderr ? e.stderr.toString() : "");
     }
 
     // Parse overview output to mark failing tests
     const fileStats = {}; // Keep for the file table
+    
+    // Find failures in the summary list (e.g., "  1. Fuzzed Multiline 6:")
+    const failedTests = new Set();
+    const failuresSectionMatch = testOutput.match(/\d+ failures?:\s*\n\n([\s\S]*?)$/);
+    if (failuresSectionMatch) {
+        const failuresContent = failuresSectionMatch[1].replace(/\x1b\[[0-9;]*m/g, "");
+        const failureLines = failuresContent.split('\n');
+        failureLines.forEach(line => {
+            const m = line.match(/^\s+\d+\.\s+(.*?):/);
+            if (m) failedTests.add(m[1].trim());
+        });
+    }
+
     corpusFiles.forEach(f => {
         const base = f.replace('.txt', '');
         fileStats[f] = { pass: 0, fail: 0 };
         
-        const searchStr = `  ${base}:`;
-        const startIndex = testOutput.indexOf(searchStr);
-        if (startIndex !== -1) {
-            const nextCatMatch = testOutput.slice(startIndex + 1).match(/\n  [\w-]+:|\n\d+ failure/);
-            const endIndex = nextCatMatch ? startIndex + 1 + nextCatMatch.index : testOutput.length;
-            const section = testOutput.slice(startIndex, endIndex);
+        // Search for the file section, e.g., "  diabolical-multiline:"
+        const sectionRegex = new RegExp(`^\\s{2}${base}:`, 'm');
+        const sectionMatch = testOutput.match(sectionRegex);
+        
+        if (sectionMatch) {
+            const startIndex = sectionMatch.index;
+            // Section ends at the next file header or at the start of failures/results
+            const nextSectionRegex = /\n  [\w-]+:|\n\d+ failure/;
+            const sectionEndMatch = testOutput.slice(startIndex + 1).match(nextSectionRegex);
+            const endIndex = sectionEndMatch ? startIndex + 1 + sectionEndMatch.index : testOutput.length;
+            const section = testOutput.slice(startIndex, endIndex).replace(/\x1b\[[0-9;]*m/g, "");
             
             const testLines = section.split('\n').filter(line => /^\s+\d+\.\s+\S/.test(line));
             testLines.forEach(line => {
-                const nameMatch = line.match(/\d+\.\s+[^✓Γ£ô✗Γ£ù\s]+\s+(.*)$/);
-                const isPass = line.includes('✓') || line.includes('Γ£ô');
-                const testName = nameMatch ? nameMatch[1].trim() : "";
+                const nameMatch = line.match(/\d+\.\s+\S+\s+(.*)$/);
+                const testName = nameMatch ? nameMatch[1].trim().replace(/\r/g, "") : "";
                 const testId = `${f}::${testName}`;
+                
+                // On Windows, the symbols might be mangled, so rely on the failedTests list
+                const isFail = failedTests.has(testName) || line.includes('Γ£ù') || line.includes('✗') || line.includes('\u2717');
+                const isPass = !isFail;
                 
                 if (allTestInfos[testId]) {
                     allTestInfos[testId].pass = isPass;
@@ -140,7 +160,8 @@ function exportRules() {
     const totals = { rules: 0, tested: 0, untested: 0, totalTests: 0, pass: 0, fail: 0 };
     
     // Global totals from all unique tests
-    Object.values(allTestInfos).forEach(t => {
+    const uniqueTests = Object.values(allTestInfos);
+    uniqueTests.forEach(t => {
         if (t.pass) totals.pass++; else totals.fail++;
         totals.totalTests++;
     });
@@ -240,15 +261,12 @@ function exportRules() {
             fs.writeFileSync(readmePath, readmeContent);
             console.log(`Successfully updated summary in README.md`);
             formatMarkdown(readmePath);
-        } else {
-            console.log(`Markers not found in README.md`);
         }
     }
 }
 
 function formatMarkdown(filePath) {
     try {
-        console.log(`Formatting ${filePath}...`);
         execSync(`npx prettier --write "${filePath}"`, { stdio: 'inherit' });
         execSync(`npx markdownlint-cli2 --fix --config .markdownlint.jsonc "${filePath}"`, { stdio: 'inherit' });
     } catch (e) {
