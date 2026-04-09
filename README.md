@@ -1,6 +1,6 @@
 # Tree-Sitter-Pascal (Delphi)
 
-[<img src="docs/Tree-sitter-Delphi.avif" style="zoom:10%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)Grammar for Pascal that focuses first on Delphi's Object Pascal. This is ultimately based on [Isopod's original implementation](https://github.com/Isopod/tree-sitter-pascal), but updated and focused on language features in the latest version of Delphi. Support of other pascal dialects like Free Pascal are a secondary priority, but pull requests are welcome and we hope to support it as well.
+[<img src="docs/Tree-sitter-Delphi.avif" style="zoom:10%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)[Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting Pascal with focus on Delphi's Object Pascal. This is ultimately based on [Isopod's original implementation](https://github.com/Isopod/tree-sitter-pascal), but updated and focused on the latest language features. Support of other pascal dialects like Free Pascal are a secondary priority, but pull requests are welcome and we hope to support it as well. See also [Delphi-tree-sitter bindings](https://github.com/jimmckeeth/delphi-tree-sitter) for consuming tree-sitter grammars from Delphi.
 
 ## What is Tree-sitter?
 
