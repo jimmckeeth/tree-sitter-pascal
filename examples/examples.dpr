@@ -1,3 +1,5 @@
+// This is just an example for the parser and not intended to compile or run
+
 program examples;
 
 {$APPTYPE CONSOLE}

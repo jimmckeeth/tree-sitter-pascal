@@ -15,3 +15,5 @@ tmp/
 *.res
 *.dcu
 *.rsm
+/**/**/Debug
+/**/**/Release

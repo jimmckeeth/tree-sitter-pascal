@@ -1,0 +1,191 @@
+name: Build Native Libraries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Comma-separated platforms (Win32,Win64,Linux64,macOS-x64,macOS-arm64,WASM)'
+        required: false
+        default: 'Win32,Win64,Linux64,macOS-x64,macOS-arm64,WASM'
+
+jobs:
+  build-windows:
+    name: Build Windows DLLs
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+
+      - name: Build core, Pascal, and extra grammars (Win32 & Win64)
+        shell: pwsh
+        run: |
+          .\build.ps1 -Platforms Win32,Win64 -Grammars
+
+      - name: Rename DLLs with platform suffix for release assets
+        shell: pwsh
+        run: |
+          $platforms = [ordered]@{
+            'Win32' = 'windows-x86'
+            'Win64' = 'windows-x64'
+          }
+          foreach ($plat in $platforms.Keys) {
+            $suffix = $platforms[$plat]
+            $dir = "Libs/$plat"
+            foreach ($dll in (Get-ChildItem "$dir/*.dll" -ErrorAction SilentlyContinue)) {
+              $base = $dll.BaseName
+              $dest = "$dir/${base}-${suffix}.dll"
+              Copy-Item $dll.FullName $dest
+              Write-Host "  $($dll.Name) -> $(Split-Path $dest -Leaf)"
+            }
+          }
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-dlls
+          path: |
+            Libs/Win32/*-windows-x86.dll
+            Libs/Win64/*-windows-x64.dll
+          retention-days: 7
+
+  build-linux:
+    name: Build Linux shared libraries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+
+      - name: Build core, Pascal, and extra grammars (Linux64)
+        shell: pwsh
+        run: |
+          ./build.ps1 -Platforms Linux64 -Grammars
+
+      - name: Rename .so files with platform suffix
+        shell: pwsh
+        run: |
+          Get-ChildItem 'Libs/Linux64/libtree-sitter*.so' | ForEach-Object {
+            $base = $_.BaseName            # libtree-sitter-pascal
+            $name = $base -replace '^lib', '' # tree-sitter-pascal
+            $dest = "Libs/Linux64/${name}-linux-x64.so"
+            Copy-Item $_.FullName $dest
+            Write-Host "  $($_.Name) -> $(Split-Path $dest -Leaf)"
+          }
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-libs
+          path: Libs/Linux64/*-linux-x64.so
+          retention-days: 7
+
+  build-macos:
+    name: Build macOS dylibs
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.13.0
+
+      - name: Build core, Pascal, and extra grammars (macOS-x64 & macOS-arm64)
+        shell: pwsh
+        run: |
+          ./build.ps1 -Platforms macOS-x64,macOS-arm64 -Grammars
+
+      - name: Rename dylibs with platform suffix
+        shell: pwsh
+        run: |
+          foreach ($plat in @('macOS-x64', 'macOS-arm64')) {
+            $suffix = $plat -replace 'macOS-', 'macos-'
+            Get-ChildItem "Libs/$plat/libtree-sitter*.dylib" | ForEach-Object {
+              $base = $_.BaseName
+              $name = $base -replace '^lib', ''
+              $dest = "Libs/$plat/${name}-${suffix}.dylib"
+              Copy-Item $_.FullName $dest
+              Write-Host "  $($_.Name) -> $(Split-Path $dest -Leaf)"
+            }
+          }
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-libs
+          path: |
+            Libs/macOS-x64/*-macos-x64.dylib
+            Libs/macOS-arm64/*-macos-arm64.dylib
+          retention-days: 7
+
+  build-wasm:
+    name: Build WASM binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build WASM grammars
+        shell: pwsh
+        run: |
+          ./build.ps1 -Platforms WASM -Grammars
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-libs
+          path: Libs/WASM/*.wasm
+          retention-days: 7
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-linux, build-macos, build-wasm]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/**
+          generate_release_notes: true
