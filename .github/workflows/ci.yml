@@ -40,7 +40,7 @@ jobs:
         commit_message: "docs: auto-update rules.md and README.md with latest test results"
         file_pattern: "docs/rules.md README.md"
 
-  release:
+  create-tag:
     needs: test-and-update
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -58,16 +58,9 @@ jobs:
         git tag $TAG
         git push origin $TAG
 
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.tag_version.outputs.tag }}
-        name: Release ${{ steps.tag_version.outputs.tag }}
-        generate_release_notes: true
-
   build-libs:
-    needs: release
+    needs: create-tag
     uses: ./.github/workflows/build-libs.yml
     with:
-      tag_name: ${{ needs.release.outputs.tag }}
+      tag_name: ${{ needs.create-tag.outputs.tag }}
     secrets: inherit
