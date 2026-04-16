@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx tree-sitter:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(gh run:*)",
+      "Bash(gh api:*)"
     ]
   }
 }

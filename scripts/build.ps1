@@ -221,4 +221,5 @@ if ($failed.Count -gt 0) {
     exit 1
 } else {
     Write-Host "All builds completed successfully." -ForegroundColor Green
+    exit 0
 }
