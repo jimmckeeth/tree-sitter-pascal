@@ -44,6 +44,8 @@ jobs:
     needs: test-and-update
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag_version.outputs.tag }}
     steps:
     - uses: actions/checkout@v4
 
@@ -62,3 +64,10 @@ jobs:
         tag_name: ${{ steps.tag_version.outputs.tag }}
         name: Release ${{ steps.tag_version.outputs.tag }}
         generate_release_notes: true
+
+  build-libs:
+    needs: release
+    uses: ./.github/workflows/build-libs.yml
+    with:
+      tag_name: ${{ needs.release.outputs.tag }}
+    secrets: inherit

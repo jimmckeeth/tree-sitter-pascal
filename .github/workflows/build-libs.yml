@@ -10,6 +10,11 @@ on:
         description: 'Comma-separated platforms (Win32,Win64,Linux64,macOS-x64,macOS-arm64,WASM)'
         required: false
         default: 'Win32,Win64,Linux64,macOS-x64,macOS-arm64,WASM'
+  workflow_call:
+    inputs:
+      tag_name:
+        required: true
+        type: string
 
 jobs:
   build-windows:
@@ -177,10 +182,27 @@ jobs:
     name: Publish GitHub Release
     needs: [build-windows, build-linux, build-macos, build-wasm]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Tag
+        id: get_tag
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag_name }}" ]; then
+            echo "TAG_NAME=${{ inputs.tag_name }}" >> $GITHUB_ENV
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "TAG_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+            echo "TAG_NAME=$LATEST_TAG" >> $GITHUB_ENV
+          fi
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -190,6 +212,7 @@ jobs:
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG_NAME }}
           files: release-assets/**
           generate_release_notes: true
         env:
