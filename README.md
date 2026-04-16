@@ -51,7 +51,7 @@ The `tree-sitter.wasm` core runtime (required for WASM use) is available from th
 
 To keep the root directory clean, the repository is organized as follows:
 
-- **`bindings/`**: Contains language-specific bindings and their package manager files (e.g., `package.json`, `setup.py`, `Cargo.toml`). Includes bindings for C, Go, Node.js, Python, Rust, and Swift.
+- **`bindings/`**: Contains language-specific bindings and their package manager files (e.g., `package.json`, `setup.py`, `Cargo.toml`). Includes bindings for C, Go, Node.js, Python, Rust, Swift, and [Delphi](https://github.com/jimmckeeth/delphi-tree-sitter) (submodule at `bindings/delphi/`).
 - **`docs/`**: Documentation, auto-generated rule coverage (`rules.md`), and branding assets.
 - **`Libs/`**: Local cache of pre-built native libraries (populated by `scripts/build.ps1`). Release artifacts are published to [GitHub Releases](https://github.com/jimmckeeth/tree-sitter-pascal/releases/latest).
 - **`scripts/`**: Contains utility scripts for building (`build.ps1`), cleaning (`clean.ps1`), and checking prerequisites (`ensure-prereq.ps1`).
