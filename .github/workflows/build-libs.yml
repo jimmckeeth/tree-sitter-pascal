@@ -184,8 +184,18 @@ jobs:
           path: release-assets
           merge-multiple: true
 
+      - name: List assets to be released (Debug)
+        run: find release-assets -type f
+
       - name: Create / update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/**
+          files: |
+            release-assets/**/*.dll
+            release-assets/**/*.so
+            release-assets/**/*.dylib
+            release-assets/**/*.wasm
           generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

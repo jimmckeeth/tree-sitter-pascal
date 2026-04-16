@@ -1,6 +1,7 @@
 # Tree-Sitter-Pascal (Delphi)
 
-[<img src="docs/Tree-sitter-Delphi-512.avif" style="zoom:50%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)[Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting Pascal with focus on Delphi's Object Pascal. This is ultimately based on [Isopod's original implementation](https://github.com/Isopod/tree-sitter-pascal), but updated and focused on the latest language features. Support of other pascal dialects like Free Pascal are a secondary priority, but pull requests are welcome and we hope to support it as well. See also [Delphi-tree-sitter bindings](https://github.com/jimmckeeth/delphi-tree-sitter) for consuming tree-sitter grammars from Delphi.
+[<img src="docs/Tree-sitter-Delphi-512.avif" style="zoom:50%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)
+A [Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting Pascal with focus on Delphi's Object Pascal. This is ultimately based on [Isopod's original implementation](https://github.com/Isopod/tree-sitter-pascal), but updated and focused on the latest language features. Support of other pascal dialects like Free Pascal are a secondary priority, but pull requests are welcome and we hope to support it as well. See also [Delphi-tree-sitter bindings](https://github.com/jimmckeeth/delphi-tree-sitter) for consuming tree-sitter grammars from Delphi.
 
 ## What is Tree-sitter?
 
@@ -30,6 +31,10 @@
 
 - Syntax highlighting
 - Scopes
+
+## Written in JavaScript and not Delphi?
+
+I get this question a lot. You could certainly rewrite the whole Tree-Sitter stack in Delphi, but I don't think that makes sense. First of all I'm a pragmatist and just want to use what works. It could be an interesting exercise to rewrite it (or even have an AI do it) but what does that gain us? The main goal for this is compatibility in the wider ecosystem, so there is an advantage of having it written in the same language as the other grammars. If we re-wrote it in Delphi then we could end up with a two different forks, which just divides the effort.
 
 ## Test Status
 
