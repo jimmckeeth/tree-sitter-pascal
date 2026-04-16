@@ -175,9 +175,12 @@ jobs:
         run: |
           .\scripts\build.ps1 -Platforms WASM
 
-      - name: Copy tree-sitter core WASM
+      - name: Download tree-sitter core WASM
         run: |
-          cp bindings/node/node_modules/tree-sitter-cli/tree-sitter.wasm Libs/WASM/tree-sitter.wasm
+          TS_VERSION=$(node -p "require('./bindings/node/node_modules/tree-sitter-cli/package.json').version")
+          echo "Downloading tree-sitter.wasm v${TS_VERSION}"
+          curl -fL "https://github.com/tree-sitter/tree-sitter/releases/download/v${TS_VERSION}/tree-sitter.wasm" \
+            -o Libs/WASM/tree-sitter.wasm
 
       - name: Upload WASM artifacts
         uses: actions/upload-artifact@v4
