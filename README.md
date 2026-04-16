@@ -84,6 +84,7 @@ npm test
 ### Individual Test Commands
 
 From the root of the repository:
+
 - **Run corpus tests:** `npx tree-sitter test`
 - **Parse example files:** `npx tree-sitter parse examples/*`
 - **Test syntax highlighting:** `npx tree-sitter highlight <path_to_file>`
