@@ -20,6 +20,7 @@ npx tree-sitter test               # Run corpus tests only
 npx tree-sitter test -f "test name" # Run a single test by name
 npx tree-sitter parse <file>       # Parse a specific Pascal file
 npx tree-sitter highlight <file>   # Debug syntax highlighting
+pwsh -ExecutionPolicy Bypass -File scripts/update-wasm.ps1 # Rebuild committed WASM for release/npm packaging
 ```
 
 **Prerequisites:** Node.js 20+, npm, C/C++ compiler. Run `npm install` first to get `tree-sitter-cli`.
@@ -64,3 +65,5 @@ Language bindings for Node.js, Rust, Python, Go, Swift, and C. These are largely
 - `docs/rules.md` and parts of `README.md` are auto-updated by CI; don't edit the auto-generated sections.
 - Version is maintained in three places: `package.json`, `Cargo.toml`, `CMakeLists.txt`.
 - Pascal keywords are case-insensitive; the grammar uses `alias(ci('keyword'), $.kKeyword)` patterns where `ci()` generates case-insensitive regex.
+- The committed WASM artifacts live at `tree-sitter-pascal.wasm` and `bindings/node/tree-sitter-pascal.wasm`; use `scripts/update-wasm.ps1` to refresh both before tagging a release.
+- `bindings/node/package.json` publishes `*.wasm`, so the package-local copy is what ships to npm.

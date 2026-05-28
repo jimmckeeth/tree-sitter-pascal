@@ -25,7 +25,8 @@
     "index.d.ts",
     "binding.cc",
     "../../queries/*",
-    "../../src/**"
+    "../../src/**",
+    "*.wasm"
   ],
   "dependencies": {
     "node-gyp-build": "^4.8.4"

@@ -47,6 +47,14 @@ Pre-built native libraries for all supported platforms are published with each [
 
 The `tree-sitter.wasm` core runtime (required for WASM use) is available from the [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases).
 
+The committed `tree-sitter-pascal.wasm` at the repository root is the release asset copy. The npm package also ships a second copy from `bindings/node/tree-sitter-pascal.wasm` because `bindings/node/package.json` includes `*.wasm` in its published files list.
+
+To refresh both copies before a release, run:
+
+```powershell
+pwsh -ExecutionPolicy Bypass -File scripts/update-wasm.ps1
+```
+
 ## Repository Organization
 
 To keep the root directory clean, the repository is organized as follows:

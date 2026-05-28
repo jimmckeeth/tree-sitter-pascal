@@ -20,3 +20,5 @@ tmp/
 /Libs
 /emsdk
 *.wasm
+!tree-sitter-pascal.wasm
+!bindings/node/tree-sitter-pascal.wasm
