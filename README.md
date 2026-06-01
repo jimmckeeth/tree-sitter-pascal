@@ -80,15 +80,15 @@ Using a [fuzzy diabolical testing](#diabolical-testing) process to produce more 
 
 | Category                                                             |  Rules  | Tested  | Untested | Total Tests | Passing  | Failing |
 | :------------------------------------------------------------------- | :-----: | :-----: | :------: | :---------: | :------: | :-----: |
-| [Declarations & Definitions](docs/rules.md#declarations-definitions) |   51    |   42    |    9     |    2751     |   2751   |    0    |
-| [Expressions](docs/rules.md#expressions)                             |   13    |   11    |    2     |    1665     |   1665   |    0    |
-| [High-Level Structure](docs/rules.md#high-level-structure)           |    9    |    9    |    0     |    2757     |   2757   |    0    |
+| [Declarations & Definitions](docs/rules.md#declarations-definitions) |   51    |   42    |    9     |    2753     |   2753   |    0    |
+| [Expressions](docs/rules.md#expressions)                             |   13    |   11    |    2     |    1667     |   1667   |    0    |
+| [High-Level Structure](docs/rules.md#high-level-structure)           |    9    |    9    |    0     |    2759     |   2759   |    0    |
 | [Internal Helpers](docs/rules.md#internal-helpers)                   |   26    |    0    |    26    |      0      |    0     |    0    |
-| [Keywords & Terminals](docs/rules.md#keywords-terminals)             |   163   |   112   |    51    |    2756     |   2756   |    0    |
+| [Keywords & Terminals](docs/rules.md#keywords-terminals)             |   163   |   112   |    51    |    2758     |   2758   |    0    |
 | [Literals](docs/rules.md#literals)                                   |    7    |    6    |    1     |    1717     |   1717   |    0    |
-| [Other](docs/rules.md#other)                                         |   12    |    5    |    7     |    2757     |   2757   |    0    |
-| [Statements](docs/rules.md#statements)                               |   24    |   23    |    1     |    2653     |   2653   |    0    |
-| **TOTAL**                                                            | **305** | **208** |  **97**  |  **2758**   | **2758** |  **0**  |
+| [Other](docs/rules.md#other)                                         |   12    |    5    |    7     |    2759     |   2759   |    0    |
+| [Statements](docs/rules.md#statements)                               |   24    |   23    |    1     |    2655     |   2655   |    0    |
+| **TOTAL**                                                            | **305** | **208** |  **97**  |  **2760**   | **2760** |  **0**  |
 
 <!-- TEST_SUMMARY_END -->
 
