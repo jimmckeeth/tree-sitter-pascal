@@ -4,66 +4,75 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Tree-sitter grammar for Pascal/Delphi/FreePascal. Generates a high-performance incremental parser from `grammar.js` for use in syntax highlighting, code navigation, and structural analysis.
-
-- **Dialect Support:** Delphi and FreePascal specific features (generics, anonymous procedures, RTTI attributes).
-- **Advanced Constructs:** Classes, records, interfaces, class helpers, nested declarations, and variant records.
-- **Interop:** FPC PasCocoa extensions for Objective-C interoperability.
-- **Performance:** Optimized for tree-sitter with specific handling for common preprocessor patterns.
+Tree-sitter grammar for Pascal/Delphi/FreePascal. Generates a high-performance incremental parser from `grammar.js` for use in syntax highlighting, code navigation, and structural analysis. The grammar targets both Delphi and FPC dialects, controlled by feature flags.
 
 ## Build & Test Commands
 
 ```bash
-npm run build                      # Generate parser (tree-sitter generate && node-gyp build)
-npm test                           # Run all tests + parse examples + export docs
-npx tree-sitter test               # Run corpus tests only
+npm run build                       # Generate parser (tree-sitter generate && node-gyp build)
+npm test                            # Run all tests + parse examples + export docs
+npx tree-sitter test                # Run corpus tests only
 npx tree-sitter test -f "test name" # Run a single test by name
-npx tree-sitter parse <file>       # Parse a specific Pascal file
-npx tree-sitter highlight <file>   # Debug syntax highlighting
-pwsh -ExecutionPolicy Bypass -File scripts/update-wasm.ps1 # Rebuild committed WASM for release/npm packaging
+npx tree-sitter parse <file>        # Parse a specific Pascal file
+npx tree-sitter highlight <file>    # Debug syntax highlighting
 ```
 
-**Prerequisites:** Node.js 20+, npm, C/C++ compiler. Run `npm install` first to get `tree-sitter-cli`.
+**Prerequisites:** Node.js 20+, npm, C/C++ compiler. Run `npm install` in `bindings/node/` first to get `tree-sitter-cli`. Run `.\scripts\ensure-prereq.ps1` to check for Zig and Emscripten (needed for DLL/WASM builds).
+
+### Building Native DLLs and WASM
+
+```powershell
+.\scripts\build.ps1 -Platforms Win32,Win64   # Build DLLs using Zig cross-compiler
+.\scripts\build.ps1                          # Build all platforms (skips iOSDevice64)
+.\scripts\update-wasm.ps1                    # Rebuild committed WASM artifacts before tagging a release
+.\scripts\clean.ps1                          # Clean Libs/, GrammarsCache/, build artifacts
+```
+
+Output goes to `Libs/<platform>/`. For Win32/Win64, the script also copies DLLs to `bindings/delphi/` test and example output directories. The committed WASM artifacts live at `tree-sitter-pascal.wasm` (repo root) and `bindings/node/tree-sitter-pascal.wasm` (shipped via npm).
 
 ## Architecture
 
 ### Grammar (`grammar.js`)
 
-The grammar is ~1,100 lines defining 305 rules. Key architectural patterns:
+~1,100 lines, ~305 rules. Key patterns:
 
 - **Feature flags** at the top (`rtti`, `lambda`, `fpc`, `delphi`, `objc`, `templates`, `use_pp`, `public_name`) control dialect-specific rule inclusion.
-- **Helper functions:** `op.infix/prefix/postfix` for operator precedence, `delimited/delimited1` for separator-delimited lists, `pp()` for preprocessor wrappers, `tr()` and `statements()` for trailing-statement variants (handles semicolon-sensitivity).
+- **Helper functions:** `op.infix/prefix/postfix(prio, ...)` for operator precedence; `delimited/delimited1(rule, sep)` for separator-delimited lists; `pp($, ...rule)` for optional `{$ifdef}...{$endif}` preprocessor wrapping (use sparingly — significant performance cost); `tr($, rule)` and `statements(trailing)` for trailing-semicolon variants (handles semicolon-sensitivity in `if/then/else`, `while/do`, etc.).
 - **Root structure:** `root` → `program | library | unit | _definition`. Units have `interface`/`implementation`/`initialization`/`finalization` sections.
-- **Conflict resolution:** Several explicit conflicts handle ambiguities like generics `<` vs comparison `<` (`exprTpl` vs `exprBinary`).
+- **Conflict resolution:** Explicit conflicts handle ambiguities like generics `<` vs comparison `<` (`exprTpl` vs `exprBinary`).
 
 ### Tests (`test/corpus/`)
 
-Tests use tree-sitter corpus format: test name, source code, separator, expected S-expression AST. Two categories:
+Tests use tree-sitter corpus format: test name, source code, separator (`---`), expected S-expression AST. Two categories:
 
 - **Standard tests** (~130): Feature-organized files (`declarations.txt`, `expressions.txt`, `statements.txt`, `generics-delphi.txt`, etc.)
 - **Diabolical tests** (~750): Auto-generated fuzzy oracle tests for edge cases (`diabolical-ternary.txt`, `diabolical-multiline.txt`, etc.). See `docs/diabolical-testing.md`.
 
+The top-level node type is always `root`, not `program`.
+
 ### Queries (`queries/`)
 
-- `highlights.scm` — Syntax highlighting rules (345 lines)
-- `locals.scm` — Local variable scoping for navigation
+- `highlights.scm` — Syntax highlighting (345 lines); the section below `EVERYTHING BELOW THIS IS OF QUESTIONABLE VALUE` contains heuristic identifier-type inference.
+- `locals.scm` — Local variable scoping for navigation.
 
 ### Bindings (`bindings/`)
 
-Language bindings for Node.js, Rust, Python, Go, Swift, and C. These are largely auto-generated by `tree-sitter generate`.
+Language bindings for Node.js, Rust, Python, Go, Swift, and C. Largely auto-generated by `tree-sitter generate`. `bindings/delphi/` is a separate git submodule with its own `CLAUDE.md`/`AGENTS.md`.
 
 ### Docs (`docs/`)
 
-- `rules.md` — Auto-generated rule coverage (do not edit manually; generated by `node docs/export_rules.js`)
+- `rules.md` — Auto-generated rule coverage (do not edit manually; regenerated by `node docs/export_rules.js`)
 - `diabolical-testing.md` — Explains fuzzy oracle testing methodology
 - `consolidation.md` — Feature roadmap and consolidation notes
 
 ## Key Conventions
 
-- After modifying `grammar.js`, always run `npm run build` to regenerate `src/parser.c` and related files.
-- The `src/` directory contains generated code — edit `grammar.js`, not `src/parser.c`.
+- After modifying `grammar.js`, always run `npm run build` to regenerate `src/parser.c` and related files. **Never edit `src/parser.c` directly.**
 - `docs/rules.md` and parts of `README.md` are auto-updated by CI; don't edit the auto-generated sections.
-- Version is maintained in three places: `package.json`, `Cargo.toml`, `CMakeLists.txt`.
-- Pascal keywords are case-insensitive; the grammar uses `alias(ci('keyword'), $.kKeyword)` patterns where `ci()` generates case-insensitive regex.
-- The committed WASM artifacts live at `tree-sitter-pascal.wasm` and `bindings/node/tree-sitter-pascal.wasm`; use `scripts/update-wasm.ps1` to refresh both before tagging a release.
-- `bindings/node/package.json` publishes `*.wasm`, so the package-local copy is what ships to npm.
+- Version is maintained in three places: `package.json`, `bindings/rust/Cargo.toml`, `bindings/c/CMakeLists.txt`.
+- Pascal keywords are case-insensitive; the grammar uses `/keyword/i` regex patterns for each terminal.
+- Run `git submodule update --init --recursive` to initialize `tree-sitter/` and `bindings/delphi/` submodules.
+
+## Known Limitations
+
+- Nested preprocessor directives (`{$ifdef}` inside `{$ifdef}`) are not fully supported — see `test/corpus/preprocessor_nested.txt` and `TODOS.md`.
