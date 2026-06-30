@@ -71,3 +71,8 @@ archs = ["x86_64", "arm64", "universal2"]
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64", "x86", "ARM64"]
+# vcruntime140.dll ships with the VC++ Redistributable already present on
+# target machines; delvewheel can't locate an ARM64 copy on the x64 runner
+# used to cross-compile win_arm64, so exclude it from repair instead of
+# bundling it.
+repair-wheel-command = "delvewheel repair --no-dll vcruntime140.dll -w {dest_dir} -v {wheel}"
