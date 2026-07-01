@@ -25,3 +25,4 @@ tmp/
 *.wasm
 !tree-sitter-pascal.wasm
 !bindings/node/tree-sitter-pascal.wasm
+.claude/settings.local.json

@@ -85,4 +85,4 @@ This is ultimately based on an original implementation by [Isopod](https://githu
 
 I've migrated my updates to [AGPL](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/LICENSE.md). I'm a big fan of open source. Unfortunately, I've seen too many companies take advantage of permissive licenses and turn an open source project into a closed source one. This is why I prefer AGPL. At the same time, I'm also a big fan of commercial software, which might seem incompatible. That is why I'm happy to provide a dual license. I'll set up a pricing structure later, but I just want to announce it is an option. Let me know if you are interested.
 
-[![Object Pascal](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/object-pascal.webp)](https://objectpascal.foundation/)
+[![Object Pascal](https://raw.githubusercontent.com/jimmckeeth/tree-sitter-pascal/main/docs/object-pascal.webp)](https://objectpascal.foundation/)
