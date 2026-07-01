@@ -9,7 +9,7 @@ description = "Pascal grammar for tree-sitter"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "AGPL-3.0-only"
-license-files = ["LICENSE"]
+license-files = ["LICENSE.md"]
 authors = [
   { name = "Jim McKeeth" }
 ]

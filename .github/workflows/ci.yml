@@ -40,8 +40,8 @@ jobs:
     - name: Commit documentation changes
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "docs: auto-update rules.md and README.md with latest test results"
-        file_pattern: "docs/rules.md README.md"
+        commit_message: "docs: auto-update rules.md and CONTRIBUTING.md with latest test results"
+        file_pattern: "docs/rules.md CONTRIBUTING.md"
 
   create-tag:
     needs: test-and-update
@@ -55,8 +55,9 @@ jobs:
     - name: Create Tag
       id: tag_version
       run: |
+        VERSION=$(jq -r '.metadata.version' tree-sitter.json)
         SHA_SHORT=$(git rev-parse --short HEAD)
-        TAG="v0.10.2-${SHA_SHORT}"
+        TAG="v${VERSION}-${SHA_SHORT}"
         echo "tag=${TAG}" >> $GITHUB_OUTPUT
         git tag $TAG
         git push origin $TAG

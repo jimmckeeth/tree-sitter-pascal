@@ -1,7 +1,23 @@
-# Tree-Sitter-Pascal (Delphi)
+# Tree-Sitter-Pascal (and Delphi)
 
-[<img src="docs/Tree-sitter-Delphi-512.avif" style="zoom:50%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)  
-A [Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting Pascal with focus on Delphi's Object Pascal. This is ultimately based on [Isopod's original implementation](https://github.com/Isopod/tree-sitter-pascal), but updated and focused on the latest language features. Support of other pascal dialects like Free Pascal are a secondary priority, but pull requests are welcome and we hope to support it as well. See also [Delphi-tree-sitter bindings](https://github.com/jimmckeeth/delphi-tree-sitter) for consuming tree-sitter grammars from Delphi.
+[![CI and Release](https://github.com/jimmckeeth/tree-sitter-pascal/actions/workflows/ci.yml/badge.svg)](https://github.com/jimmckeeth/tree-sitter-pascal/actions/workflows/ci.yml)
+[![Python Wheels](https://github.com/jimmckeeth/tree-sitter-pascal/actions/workflows/python-wheels.yml/badge.svg)](https://github.com/jimmckeeth/tree-sitter-pascal/actions/workflows/python-wheels.yml)
+
+[<img src="https://raw.githubusercontent.com/jimmckeeth/tree-sitter-pascal/main/docs/Tree-sitter-Delphi-512.avif" style="zoom:50%; float:right;" alt="tree sitter Delphi logo - a hoplite/spartan warrior sitting in a tree next to a treehouse"/>](https://github.com/jimmckeeth/Tree-sitter-Delphi)  
+A [Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting Pascal with focus on [Delphi's Object Pascal](https://delphi.embarcadero.com/), updated and focused on the latest language features. Support of other Pascal dialects like [Free Pascal](https://www.freepascal.org/) and [Oxygene](https://www.remobjects.com/elements/oxygene/) are also planned, and **[pull requests are welcome](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/CONTRIBUTING.md)**. 
+
+See also [Delphi-tree-sitter bindings](https://github.com/jimmckeeth/delphi-tree-sitter) for consuming tree-sitter grammars from Delphi.
+
+## Contents
+
+- [What is Tree-sitter?](#what-is-tree-sitter)
+- [Supported language features](#supported-language-features)
+- [Tree-sitter features](#tree-sitter-features)
+- [Python Package](#python-package)
+- [Pre-built Binaries](#pre-built-binaries)
+- [Contributing](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/CONTRIBUTING.md)
+- [Contributors](#contributors)
+- [License](#license)
 
 ## What is Tree-sitter?
 
@@ -32,6 +48,18 @@ A [Tree-sitter](https://github.com/tree-sitter/tree-sitter) grammar supporting P
 - Syntax highlighting
 - Scopes
 
+## Python Package
+
+The Python binding is published as `tree-sitter-pascal` and imported as `tree_sitter_pascal`.
+
+```bash
+python -m pip install tree-sitter-pascal
+```
+
+Python wheels are built with `cibuildwheel` and published through PyPI Trusted Publishing. Use the manual TestPyPI workflow first when validating a new release path. Production PyPI publishing runs only when a GitHub Release is published for a non-hyphenated release tag such as `v0.11.0`; auto-generated tags like `v0.11.0-abc1234` are ignored.
+
+Before the first upload, configure PyPI trusted publishers for the `publish-testpypi.yml` and `publish-pypi.yml` workflows, using the `testpypi` and `pypi` GitHub environments respectively.
+
 ## Pre-built Binaries
 
 Pre-built native libraries for all supported platforms are published with each [GitHub Release](https://github.com/jimmckeeth/tree-sitter-pascal/releases/latest):
@@ -49,83 +77,12 @@ The `tree-sitter.wasm` core runtime (required for WASM use) is available from th
 
 The committed `tree-sitter-pascal.wasm` at the repository root is the release asset copy. The npm package also ships a second copy from `bindings/node/tree-sitter-pascal.wasm` because `bindings/node/package.json` includes `*.wasm` in its published files list.
 
-To refresh both copies before a release, run:
+## Contributors
 
-```powershell
-pwsh -ExecutionPolicy Bypass -File scripts/update-wasm.ps1
-```
-
-## Python Package
-
-The Python binding is published as `tree-sitter-pascal` and imported as `tree_sitter_pascal`.
-
-```bash
-python -m pip install tree-sitter-pascal
-```
-
-Python wheels are built with `cibuildwheel` and published through PyPI Trusted Publishing. Use the manual TestPyPI workflow first when validating a new release path. Production PyPI publishing runs only when a GitHub Release is published for a non-hyphenated release tag such as `v0.10.2`; auto-generated tags like `v0.10.2-abc1234` are ignored.
-
-Before the first upload, configure PyPI trusted publishers for the `publish-testpypi.yml` and `publish-pypi.yml` workflows, using the `testpypi` and `pypi` GitHub environments respectively.
-
-## Repository Organization
-
-To keep the root directory clean, the repository is organized as follows:
-
-- **`bindings/`**: Contains language-specific bindings and their package manager files (e.g., `package.json`, `setup.py`, `Cargo.toml`). Includes bindings for C, Go, Node.js, Python, Rust, Swift, and [Delphi](https://github.com/jimmckeeth/delphi-tree-sitter) (submodule at `bindings/delphi/`).
-- **`docs/`**: Documentation, auto-generated rule coverage (`rules.md`), branding assets, and the [Delphi Win64 binding guide](docs/delphi-win64-binding.md).
-- **`Libs/`**: Local cache of pre-built native libraries (populated by `scripts/build.ps1`). Release artifacts are published to [GitHub Releases](https://github.com/jimmckeeth/tree-sitter-pascal/releases/latest).
-- **`scripts/`**: Contains utility scripts for building (`build.ps1`), cleaning (`clean.ps1`), and checking prerequisites (`ensure-prereq.ps1`).
-- **`src/`**: The generated C parser and header files. Edit `grammar.js`, not these files directly.
-- **`queries/`**: Tree-sitter query files for syntax highlighting and local variables.
-- **`test/`**: The test corpus and fuzzing scripts.
-- **`examples/`**: Example Pascal files for testing and demonstration.
-
-## Written in JavaScript and not Delphi?
-
-I get this question a lot. You could certainly rewrite the whole Tree-Sitter stack in Delphi, but I don't think that makes sense. First of all I'm a pragmatist and just want to use what works. It could be an interesting exercise to rewrite it (or even have an AI do it) but what does that gain us? The main goal for this is compatibility in the wider ecosystem, so there is an advantage of having it written in the same language as the other grammars. If we re-wrote it in Delphi then we could end up with a two different forks, which just divides the effort.
-
-## Test Status
-
-Using a [fuzzy diabolical testing](#diabolical-testing) process to produce more failing tests to improve the grammar accuracy. Currently all the failing tests are related to multiline strings.
-
-<!-- TEST_SUMMARY_START -->
-
-| Category                                                             |  Rules  | Tested  | Untested | Total Tests | Passing  | Failing |
-| :------------------------------------------------------------------- | :-----: | :-----: | :------: | :---------: | :------: | :-----: |
-| [Declarations & Definitions](docs/rules.md#declarations-definitions) |   51    |   42    |    9     |    2753     |   2753   |    0    |
-| [Expressions](docs/rules.md#expressions)                             |   13    |   11    |    2     |    1667     |   1667   |    0    |
-| [High-Level Structure](docs/rules.md#high-level-structure)           |    9    |    9    |    0     |    2759     |   2759   |    0    |
-| [Internal Helpers](docs/rules.md#internal-helpers)                   |   26    |    0    |    26    |      0      |    0     |    0    |
-| [Keywords & Terminals](docs/rules.md#keywords-terminals)             |   163   |   112   |    51    |    2758     |   2758   |    0    |
-| [Literals](docs/rules.md#literals)                                   |    7    |    6    |    1     |    1717     |   1717   |    0    |
-| [Other](docs/rules.md#other)                                         |   12    |    5    |    7     |    2759     |   2759   |    0    |
-| [Statements](docs/rules.md#statements)                               |   24    |   23    |    1     |    2655     |   2655   |    0    |
-| **TOTAL**                                                            | **305** | **208** |  **97**  |  **2760**   | **2760** |  **0**  |
-
-<!-- TEST_SUMMARY_END -->
-
-## Diabolical Testing
-
-To ensure the grammar's robustness beyond simple "happy path" scenarios, we use a [Diabolical Testing Process](docs/diabolical-testing.md). This involves fuzzing valid Delphi code through the actual compiler and comparing the resulting Tree-sitter AST against a structural oracle. This process specifically targets complex edge cases in modern Delphi features to identify logical flaws in precedence, associativity, and structure.
-
-## Testing
-
-To run the full test suite, which includes grammar validation and parsing example files, use:
-
-```powershell
-cd bindings/node
-npm install
-npm test
-```
-
-### Individual Test Commands
-
-From the root of the repository:
-
-- **Run corpus tests:** `npx tree-sitter test`
-- **Parse example files:** `npx tree-sitter parse examples/*`
-- **Test syntax highlighting:** `npx tree-sitter highlight <path_to_file>`
+This is ultimately based on an original implementation by [Isopod](https://github.com/Isopod/tree-sitter-pascal), with updates by [Warren Postma](https://github.com/wpostma/tree-sitter-pascal). See our [contributing guide](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/CONTRIBUTING.md).
 
 ## License
 
-I've migrated my updates to [AGPL](license). I'm a big fan of open source. Unfortunately, I've seen too many companies take advantage of permissive licenses and turn an open source project into a closed source one. This is why I prefer AGPL. At the same time, I'm also a big fan of commercial software, which might seem incompatible. That is why I'm happy to provide a dual license. I'll set up a pricing structure later, but I just want to announce it is an option. Let me know if you are interested.
+I've migrated my updates to [AGPL](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/LICENSE.md). I'm a big fan of open source. Unfortunately, I've seen too many companies take advantage of permissive licenses and turn an open source project into a closed source one. This is why I prefer AGPL. At the same time, I'm also a big fan of commercial software, which might seem incompatible. That is why I'm happy to provide a dual license. I'll set up a pricing structure later, but I just want to announce it is an option. Let me know if you are interested.
+
+[![Object Pascal](https://github.com/jimmckeeth/tree-sitter-pascal/blob/main/object-pascal.webp)](https://objectpascal.foundation/)

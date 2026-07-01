@@ -248,25 +248,25 @@ function exportRules() {
     console.log(`Successfully exported rules to ${outputPath}`);
     formatMarkdown(outputPath);
 
-    // 7. Update README.md
-    const readmePath = path.join(__dirname, '..', 'README.md');
-    if (fs.existsSync(readmePath)) {
-        let readmeContent = fs.readFileSync(readmePath, 'utf8');
-        // Replace links in summaryTable for README (point to docs/rules.md)
-        let readmeSummary = summaryTable.replace(/\]\(#/g, '](docs/rules.md#');
-        
+    // 7. Update CONTRIBUTING.md
+    const contributingPath = path.join(__dirname, '..', 'CONTRIBUTING.md');
+    if (fs.existsSync(contributingPath)) {
+        let contributingContent = fs.readFileSync(contributingPath, 'utf8');
+        // Replace links in summaryTable for CONTRIBUTING.md (point to docs/rules.md)
+        let contributingSummary = summaryTable.replace(/\]\(#/g, '](docs/rules.md#');
+
         const startMarker = '<!-- TEST_SUMMARY_START -->';
         const endMarker = '<!-- TEST_SUMMARY_END -->';
-        const startIndex = readmeContent.indexOf(startMarker);
-        const endIndex = readmeContent.indexOf(endMarker);
-        
+        const startIndex = contributingContent.indexOf(startMarker);
+        const endIndex = contributingContent.indexOf(endMarker);
+
         if (startIndex !== -1 && endIndex !== -1) {
-            readmeContent = readmeContent.substring(0, startIndex + startMarker.length) 
-                + '\n\n' + readmeSummary + '\n' 
-                + readmeContent.substring(endIndex);
-            fs.writeFileSync(readmePath, readmeContent);
-            console.log(`Successfully updated summary in README.md`);
-            formatMarkdown(readmePath);
+            contributingContent = contributingContent.substring(0, startIndex + startMarker.length)
+                + '\n\n' + contributingSummary + '\n'
+                + contributingContent.substring(endIndex);
+            fs.writeFileSync(contributingPath, contributingContent);
+            console.log(`Successfully updated summary in CONTRIBUTING.md`);
+            formatMarkdown(contributingPath);
         }
     }
 }
