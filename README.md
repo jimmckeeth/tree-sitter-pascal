@@ -55,6 +55,18 @@ To refresh both copies before a release, run:
 pwsh -ExecutionPolicy Bypass -File scripts/update-wasm.ps1
 ```
 
+## Python Package
+
+The Python binding is published as `tree-sitter-pascal` and imported as `tree_sitter_pascal`.
+
+```bash
+python -m pip install tree-sitter-pascal
+```
+
+Python wheels are built with `cibuildwheel` and published through PyPI Trusted Publishing. Use the manual TestPyPI workflow first when validating a new release path. Production PyPI publishing runs only when a GitHub Release is published for a non-hyphenated release tag such as `v0.10.2`; auto-generated tags like `v0.10.2-abc1234` are ignored.
+
+Before the first upload, configure PyPI trusted publishers for the `publish-testpypi.yml` and `publish-pypi.yml` workflows, using the `testpypi` and `pypi` GitHub environments respectively.
+
 ## Repository Organization
 
 To keep the root directory clean, the repository is organized as follows:

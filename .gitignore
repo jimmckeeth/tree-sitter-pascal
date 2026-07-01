@@ -1,5 +1,8 @@
 node_modules
 build
+dist
+wheelhouse
+__pycache__/
 *.log
 *.obj
 *.lib
