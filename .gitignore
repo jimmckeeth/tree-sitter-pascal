@@ -27,3 +27,4 @@ tmp/
 !bindings/node/tree-sitter-pascal.wasm
 *.webc
 .claude/settings.local.json
+pascal.dll
