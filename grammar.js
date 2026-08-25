@@ -564,8 +564,8 @@ module.exports = grammar({
 			field('header', $.declProc),
 			pp(
 			 	$,
-				field('local', optional($._definitions)),
-				field('body', choice(tr($, 'block'), tr($, 'asm'))),
+				pp(field('local', optional($._definitions))),
+				pp(field('body', choice(tr($, 'block'), tr($, 'asm')))),
 				';'
 			)
 		),
