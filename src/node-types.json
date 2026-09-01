@@ -3041,10 +3041,6 @@
         "required": false,
         "types": [
           {
-            "type": "block",
-            "named": true
-          },
-          {
             "type": "declConsts",
             "named": true
           },
@@ -6122,10 +6118,6 @@
       "required": true,
       "types": [
         {
-          "type": "block",
-          "named": true
-        },
-        {
           "type": "declConsts",
           "named": true
         },
@@ -6229,6 +6221,10 @@
         },
         {
           "type": "inlineConst",
+          "named": true
+        },
+        {
+          "type": "kBegin",
           "named": true
         },
         {
@@ -6420,10 +6416,6 @@
         "multiple": true,
         "required": false,
         "types": [
-          {
-            "type": "block",
-            "named": true
-          },
           {
             "type": "declConsts",
             "named": true
@@ -7731,10 +7723,6 @@
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "block",
-          "named": true
-        },
         {
           "type": "declConsts",
           "named": true

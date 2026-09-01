@@ -322,9 +322,17 @@ module.exports = grammar({
 			repeat(choice(
 				$.interface,
 				$.implementation,
-				$.initialization,
-				$.finalization,
 			)),
+			choice(
+				// Keyword form: optional initialization / finalization sections.
+				seq(
+					optional($.initialization),
+					optional($.finalization),
+				),
+				// Legacy short-form: a bare `begin ... end.` initialization
+				// section with no `initialization` keyword.
+				alias($.initializationBlock, $.initialization),
+			),
 			$.kEnd, $.kEndDot
 		),
 
@@ -332,6 +340,10 @@ module.exports = grammar({
 		implementation:  $ => seq($.kImplementation, optional($._definitions)),
 		initialization:  $ => seq($.kInitialization, optional(tr($,'_statements'))),
 		finalization:    $ => seq($.kFinalization, optional(tr($,'_statements'))),
+		// Legacy short-form initialization section: a bare `begin ... end.`
+		// with no `initialization` keyword. The unit's trailing `kEnd kEndDot`
+		// consumes the closing `end .`.
+		initializationBlock: $ => seq($.kBegin, optional(tr($,'_statements'))),
 
 		moduleName:      $ => delimited1($.identifier, $.kDot),
 
@@ -428,7 +440,7 @@ module.exports = grammar({
 
 		exprTpl:         $ => op.args(5, $._ref, $.kLt, delimited1($._expr, ',', 5),  $.kGt),
 		exprSubscript:   $ => op.args(5, $._ref, '[',   $.exprArgs,  ']'  ),
-		exprCall:        $ => op.args(5, $._ref, '(',   optional($.exprArgs), ')'  ),
+		exprCall:        $ => op.args(6, $._ref, '(',   optional($.exprArgs), ')'  ),
 
 		legacyFormat:    $ => repeat1(seq(':', $._expr)),
 
@@ -556,15 +568,14 @@ module.exports = grammar({
 		_definition:     $ => choice(
 			$.declTypes, $.declVars, $.declConsts, $.defProc,
 			alias($.declProcFwd, $.declProc),
-			$.declLabels, $.declUses, $.declExports,
-			prec(-1,tr($,'block'))
+			$.declLabels, $.declUses, $.declExports
 		),
 
 		defProc:         $ => seq(
 			field('header', $.declProc),
 			pp(
 			 	$,
-				field('local', optional($._definitions)),
+				pp($, field('local', optional($._definitions))),
 				field('body', choice(tr($, 'block'), tr($, 'asm'))),
 				';'
 			)
