@@ -428,7 +428,7 @@ module.exports = grammar({
 
 		exprTpl:         $ => op.args(5, $._ref, $.kLt, delimited1($._expr, ',', 5),  $.kGt),
 		exprSubscript:   $ => op.args(5, $._ref, '[',   $.exprArgs,  ']'  ),
-		exprCall:        $ => op.args(5, $._ref, '(',   optional($.exprArgs), ')'  ),
+		exprCall:        $ => op.args(6, $._ref, '(',   optional($.exprArgs), ')'  ),
 
 		legacyFormat:    $ => repeat1(seq(':', $._expr)),
 
