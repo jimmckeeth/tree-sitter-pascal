@@ -4789,7 +4789,7 @@
       "members": [
         {
           "type": "PATTERN",
-          "value": "'[^']*'"
+          "value": "'(?:[^']|'')*'"
         },
         {
           "type": "SYMBOL",
@@ -9996,5 +9996,6 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }

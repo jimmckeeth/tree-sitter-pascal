@@ -8953,7 +8953,8 @@
   },
   {
     "type": "comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "identifier",
@@ -9593,6 +9594,7 @@
   },
   {
     "type": "pp",
-    "named": true
+    "named": true,
+    "extra": true
   }
 ]
