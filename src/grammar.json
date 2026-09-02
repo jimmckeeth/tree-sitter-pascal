@@ -5007,239 +5007,47 @@
               "type": "SEQ",
               "members": [
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "FIELD",
-                          "name": "local",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "_definitions"
-                              },
-                              {
-                                "type": "BLANK"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$if[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        },
-                        {
-                          "type": "FIELD",
-                          "name": "local",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "_definitions"
-                              },
-                              {
-                                "type": "BLANK"
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$else[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              },
-                              {
-                                "type": "FIELD",
-                                "name": "local",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "SYMBOL",
-                                      "name": "_definitions"
-                                    },
-                                    {
-                                      "type": "BLANK"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$end[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        }
-                      ]
-                    }
-                  ]
+                  "type": "FIELD",
+                  "name": "local",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "_definitions"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  }
                 },
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "FIELD",
-                          "name": "body",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "blockTr"
-                                },
-                                "named": true,
-                                "value": "block"
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "asmTr"
-                                },
-                                "named": true,
-                                "value": "asm"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$if[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
+                  "type": "FIELD",
+                  "name": "body",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "blockTr"
                         },
-                        {
-                          "type": "FIELD",
-                          "name": "body",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "blockTr"
-                                },
-                                "named": true,
-                                "value": "block"
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "asmTr"
-                                },
-                                "named": true,
-                                "value": "asm"
-                              }
-                            ]
-                          }
+                        "named": true,
+                        "value": "block"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "asmTr"
                         },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$else[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              },
-                              {
-                                "type": "FIELD",
-                                "name": "body",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "blockTr"
-                                      },
-                                      "named": true,
-                                      "value": "block"
-                                    },
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "asmTr"
-                                      },
-                                      "named": true,
-                                      "value": "asm"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$end[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        }
-                      ]
-                    }
-                  ]
+                        "named": true,
+                        "value": "asm"
+                      }
+                    ]
+                  }
                 },
                 {
                   "type": "STRING",
@@ -5261,239 +5069,47 @@
                   "value": "pp"
                 },
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "FIELD",
-                          "name": "local",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "_definitions"
-                              },
-                              {
-                                "type": "BLANK"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$if[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        },
-                        {
-                          "type": "FIELD",
-                          "name": "local",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "SYMBOL",
-                                "name": "_definitions"
-                              },
-                              {
-                                "type": "BLANK"
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$else[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              },
-                              {
-                                "type": "FIELD",
-                                "name": "local",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "SYMBOL",
-                                      "name": "_definitions"
-                                    },
-                                    {
-                                      "type": "BLANK"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$end[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        }
-                      ]
-                    }
-                  ]
+                  "type": "FIELD",
+                  "name": "local",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "SYMBOL",
+                        "name": "_definitions"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  }
                 },
                 {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "FIELD",
-                          "name": "body",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "blockTr"
-                                },
-                                "named": true,
-                                "value": "block"
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "asmTr"
-                                },
-                                "named": true,
-                                "value": "asm"
-                              }
-                            ]
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "SEQ",
-                      "members": [
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$if[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
+                  "type": "FIELD",
+                  "name": "body",
+                  "content": {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "blockTr"
                         },
-                        {
-                          "type": "FIELD",
-                          "name": "body",
-                          "content": {
-                            "type": "CHOICE",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "blockTr"
-                                },
-                                "named": true,
-                                "value": "block"
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "SYMBOL",
-                                  "name": "asmTr"
-                                },
-                                "named": true,
-                                "value": "asm"
-                              }
-                            ]
-                          }
+                        "named": true,
+                        "value": "block"
+                      },
+                      {
+                        "type": "ALIAS",
+                        "content": {
+                          "type": "SYMBOL",
+                          "name": "asmTr"
                         },
-                        {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$else[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              },
-                              {
-                                "type": "FIELD",
-                                "name": "body",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "blockTr"
-                                      },
-                                      "named": true,
-                                      "value": "block"
-                                    },
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "asmTr"
-                                      },
-                                      "named": true,
-                                      "value": "asm"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          }
-                        },
-                        {
-                          "type": "ALIAS",
-                          "content": {
-                            "type": "PATTERN",
-                            "value": "\\{\\$end[^}]*\\}",
-                            "flags": "i"
-                          },
-                          "named": true,
-                          "value": "pp"
-                        }
-                      ]
-                    }
-                  ]
+                        "named": true,
+                        "value": "asm"
+                      }
+                    ]
+                  }
                 },
                 {
                   "type": "STRING",
@@ -5515,239 +5131,47 @@
                         "value": "pp"
                       },
                       {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "FIELD",
-                                "name": "local",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "SYMBOL",
-                                      "name": "_definitions"
-                                    },
-                                    {
-                                      "type": "BLANK"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$if[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              },
-                              {
-                                "type": "FIELD",
-                                "name": "local",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "SYMBOL",
-                                      "name": "_definitions"
-                                    },
-                                    {
-                                      "type": "BLANK"
-                                    }
-                                  ]
-                                }
-                              },
-                              {
-                                "type": "REPEAT",
-                                "content": {
-                                  "type": "SEQ",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "PATTERN",
-                                        "value": "\\{\\$else[^}]*\\}",
-                                        "flags": "i"
-                                      },
-                                      "named": true,
-                                      "value": "pp"
-                                    },
-                                    {
-                                      "type": "FIELD",
-                                      "name": "local",
-                                      "content": {
-                                        "type": "CHOICE",
-                                        "members": [
-                                          {
-                                            "type": "SYMBOL",
-                                            "name": "_definitions"
-                                          },
-                                          {
-                                            "type": "BLANK"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$end[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              }
-                            ]
-                          }
-                        ]
+                        "type": "FIELD",
+                        "name": "local",
+                        "content": {
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "SYMBOL",
+                              "name": "_definitions"
+                            },
+                            {
+                              "type": "BLANK"
+                            }
+                          ]
+                        }
                       },
                       {
-                        "type": "CHOICE",
-                        "members": [
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "FIELD",
-                                "name": "body",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "blockTr"
-                                      },
-                                      "named": true,
-                                      "value": "block"
-                                    },
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "asmTr"
-                                      },
-                                      "named": true,
-                                      "value": "asm"
-                                    }
-                                  ]
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "SEQ",
-                            "members": [
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$if[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
+                        "type": "FIELD",
+                        "name": "body",
+                        "content": {
+                          "type": "CHOICE",
+                          "members": [
+                            {
+                              "type": "ALIAS",
+                              "content": {
+                                "type": "SYMBOL",
+                                "name": "blockTr"
                               },
-                              {
-                                "type": "FIELD",
-                                "name": "body",
-                                "content": {
-                                  "type": "CHOICE",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "blockTr"
-                                      },
-                                      "named": true,
-                                      "value": "block"
-                                    },
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "SYMBOL",
-                                        "name": "asmTr"
-                                      },
-                                      "named": true,
-                                      "value": "asm"
-                                    }
-                                  ]
-                                }
+                              "named": true,
+                              "value": "block"
+                            },
+                            {
+                              "type": "ALIAS",
+                              "content": {
+                                "type": "SYMBOL",
+                                "name": "asmTr"
                               },
-                              {
-                                "type": "REPEAT",
-                                "content": {
-                                  "type": "SEQ",
-                                  "members": [
-                                    {
-                                      "type": "ALIAS",
-                                      "content": {
-                                        "type": "PATTERN",
-                                        "value": "\\{\\$else[^}]*\\}",
-                                        "flags": "i"
-                                      },
-                                      "named": true,
-                                      "value": "pp"
-                                    },
-                                    {
-                                      "type": "FIELD",
-                                      "name": "body",
-                                      "content": {
-                                        "type": "CHOICE",
-                                        "members": [
-                                          {
-                                            "type": "ALIAS",
-                                            "content": {
-                                              "type": "SYMBOL",
-                                              "name": "blockTr"
-                                            },
-                                            "named": true,
-                                            "value": "block"
-                                          },
-                                          {
-                                            "type": "ALIAS",
-                                            "content": {
-                                              "type": "SYMBOL",
-                                              "name": "asmTr"
-                                            },
-                                            "named": true,
-                                            "value": "asm"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              },
-                              {
-                                "type": "ALIAS",
-                                "content": {
-                                  "type": "PATTERN",
-                                  "value": "\\{\\$end[^}]*\\}",
-                                  "flags": "i"
-                                },
-                                "named": true,
-                                "value": "pp"
-                              }
-                            ]
-                          }
-                        ]
+                              "named": true,
+                              "value": "asm"
+                            }
+                          ]
+                        }
                       },
                       {
                         "type": "STRING",
@@ -10572,6 +9996,5 @@
   "precedences": [],
   "externals": [],
   "inline": [],
-  "supertypes": [],
-  "reserved": {}
+  "supertypes": []
 }
