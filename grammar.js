@@ -528,7 +528,7 @@ module.exports = grammar({
 			$.kNil, $.kTrue, $.kFalse
 		),
 		literalString:   $ => repeat1($._literalString),
-		_literalString:  $ => choice(/'[^']*'/, $.literalChar, "''"),
+		_literalString:  $ => choice(/'(?:[^']|'')*'/, $.literalChar),
 		literalStringMultiline: $ => prec(10, seq(
 			"'''",
 			alias(repeat(choice(/[^']/, /'[^']/, /''[^']/)), $.stringContent),
